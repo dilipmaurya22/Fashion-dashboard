@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["icon.component.ts"],
+  "sourcesContent": [":host { display: inline-flex; line-height: 0; }"],
+  "mappings": ";AAAA;AAAQ,WAAA;AAAsB,eAAA;;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/inventory/inventory.component.scss"],
+  "sourcesContent": [".adj-cur { padding: 10px 14px; background: var(--bg); border-radius: 8px; margin-bottom: 16px; font-size: 14px; }\n.adj-preview { padding: 12px 14px; background: var(--orange-soft); color: var(--orange-dark); border-radius: 8px; font-weight: 600; }\n"],
+  "mappings": ";AAAA,CAAA;AAAW,WAAA,KAAA;AAAoB,cAAA,IAAA;AAAuB,iBAAA;AAAoB,iBAAA;AAAqB,aAAA;;AAC/F,CAAA;AAAe,WAAA,KAAA;AAAoB,cAAA,IAAA;AAAgC,SAAA,IAAA;AAA2B,iBAAA;AAAoB,eAAA;;",
+  "names": []
+}

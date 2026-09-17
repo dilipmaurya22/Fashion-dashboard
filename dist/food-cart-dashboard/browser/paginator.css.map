@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["paginator.ts"],
+  "sourcesContent": ["\n    .pager { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-top: 1px solid var(--border); }\n    .controls { display: flex; align-items: center; gap: 8px; }\n    .pg { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text);\n      display: flex; align-items: center; justify-content: center; }\n    .pg:disabled { opacity: .4; }\n    .cur { font-size: 13px; font-weight: 600; min-width: 56px; text-align: center; }\n  "],
+  "mappings": ";AACI,CAAA;AAAS,WAAA;AAAe,eAAA;AAAqB,mBAAA;AAAgC,WAAA,KAAA;AAAoB,cAAA,IAAA,MAAA,IAAA;;AACjG,CAAA;AAAY,WAAA;AAAe,eAAA;AAAqB,OAAA;;AAChD,CAAA;AAAM,SAAA;AAAa,UAAA;AAAc,iBAAA;AAAoB,UAAA,IAAA,MAAA,IAAA;AAAiC,cAAA,IAAA;AAAyB,SAAA,IAAA;AAC7G,WAAA;AAAe,eAAA;AAAqB,mBAAA;;AACtC,CAFA,EAEA;AAAe,WAAA;;AACf,CAAA;AAAO,aAAA;AAAiB,eAAA;AAAkB,aAAA;AAAiB,cAAA;;",
+  "names": []
+}

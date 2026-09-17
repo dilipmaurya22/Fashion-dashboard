@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/categories/categories.component.scss"],
+  "sourcesContent": [".cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }\n.cat-card { display: flex; align-items: center; gap: 14px; padding: 16px; }\n.cat-ic { width: 44px; height: 44px; border-radius: 11px; background: var(--orange-soft); color: var(--orange-dark);\n  display: flex; align-items: center; justify-content: center; flex-shrink: 0; }\n.cat-body { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }\n.tg { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }\n.tg input { accent-color: var(--orange); width: 16px; height: 16px; }\n"],
+  "mappings": ";AAAA,CAAA;AAAY,WAAA;AAAe,yBAAA,OAAA,SAAA,EAAA,OAAA,KAAA,EAAA;AAA8D,OAAA;;AACzF,CAAA;AAAY,WAAA;AAAe,eAAA;AAAqB,OAAA;AAAW,WAAA;;AAC3D,CAAA;AAAU,SAAA;AAAa,UAAA;AAAc,iBAAA;AAAqB,cAAA,IAAA;AAAgC,SAAA,IAAA;AACxF,WAAA;AAAe,eAAA;AAAqB,mBAAA;AAAyB,eAAA;;AAC/D,CAAA;AAAY,QAAA;AAAS,WAAA;AAAe,kBAAA;AAAwB,OAAA;AAAU,aAAA;;AACtE,CAAA;AAAM,WAAA;AAAe,eAAA;AAAqB,OAAA;AAAU,aAAA;AAAiB,UAAA;;AACrE,CADA,GACA;AAAY,gBAAA,IAAA;AAA6B,SAAA;AAAa,UAAA;;",
+  "names": []
+}

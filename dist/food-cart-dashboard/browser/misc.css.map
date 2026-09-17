@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["misc.ts"],
+  "sourcesContent": [".load { display:flex; flex-direction:column; align-items:center; gap:12px; padding:48px; }"],
+  "mappings": ";AAAA,CAAA;AAAQ,WAAA;AAAc,kBAAA;AAAuB,eAAA;AAAoB,OAAA;AAAU,WAAA;;",
+  "names": []
+}

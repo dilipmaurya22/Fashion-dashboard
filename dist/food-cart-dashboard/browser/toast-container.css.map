@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["toast-container.ts"],
+  "sourcesContent": ["\n    .toasts { position: fixed; top: 16px; right: 16px; z-index: 3000; display:flex; flex-direction:column; gap:10px; }\n    .toast { display:flex; align-items:center; gap:10px; padding:12px 16px; border-radius:10px; color:#fff;\n      box-shadow: var(--shadow-lg); font-size:14px; font-weight:500; cursor:pointer; min-width:240px; max-width:380px;\n      animation: toastIn .2s ease; }\n    .toast.success { background: var(--success); }\n    .toast.error { background: var(--danger); }\n    .toast.warning { background: var(--warning); }\n    .toast.info { background: var(--info); }\n  "],
+  "mappings": ";AACI,CAAA;AAAU,YAAA;AAAiB,OAAA;AAAW,SAAA;AAAa,WAAA;AAAe,WAAA;AAAc,kBAAA;AAAuB,OAAA;;AACvG,CAAA;AAAS,WAAA;AAAc,eAAA;AAAoB,OAAA;AAAU,WAAA,KAAA;AAAmB,iBAAA;AAAoB,SAAA;AAC1F,cAAA,IAAA;AAA8B,aAAA;AAAgB,eAAA;AAAiB,UAAA;AAAgB,aAAA;AAAiB,aAAA;AAChG,aAAA,QAAA,KAAA;;AACF,CAHA,KAGA,CAAA;AAAiB,cAAA,IAAA;;AACjB,CAJA,KAIA,CAAA;AAAe,cAAA,IAAA;;AACf,CALA,KAKA,CAAA;AAAiB,cAAA,IAAA;;AACjB,CANA,KAMA,CAAA;AAAc,cAAA,IAAA;;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/inventory/stock-in.component.scss"],
+  "sourcesContent": [".back { display: inline-flex; align-items: center; gap: 4px; color: var(--text-secondary); font-weight: 600; font-size: 13px; margin-bottom: 16px; }\n.back:hover { color: var(--orange-dark); }\n.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }\n.form-control.sm { padding: 7px 10px; }\ntable.data td { padding: 10px 16px; }\n.foot { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-top: 1px solid var(--border); }\n.grand { font-size: 16px; } .grand b { font-size: 20px; margin-left: 6px; }\n@media (max-width: 720px) { .grid-3 { grid-template-columns: 1fr; } }\n"],
+  "mappings": ";AAAA,CAAA;AAAQ,WAAA;AAAsB,eAAA;AAAqB,OAAA;AAAU,SAAA,IAAA;AAA8B,eAAA;AAAkB,aAAA;AAAiB,iBAAA;;AAC9H,CADA,IACA;AAAc,SAAA,IAAA;;AACd,CAAA;AAAU,WAAA;AAAe,yBAAA,OAAA,CAAA,EAAA;AAAuC,OAAA;;AAChE,CAAA,YAAA,CAAA;AAAmB,WAAA,IAAA;;AACnB,KAAA,CAAA,KAAA;AAAgB,WAAA,KAAA;;AAChB,CAAA;AAAQ,WAAA;AAAe,eAAA;AAAqB,mBAAA;AAAgC,WAAA,KAAA;AAAoB,cAAA,IAAA,MAAA,IAAA;;AAChG,CAAA;AAAS,aAAA;;AAAmB,CAA5B,MAA4B;AAAW,aAAA;AAAiB,eAAA;;AACxD,OAAA,CAAA,SAAA,EAAA;AAA4B,GAL5B;AAKsC,2BAAA;;;",
+  "names": []
+}

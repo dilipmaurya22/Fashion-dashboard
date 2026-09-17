@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/pipes/money.pipe.ts"],
+  "sourcesContent": ["import { Pipe, PipeTransform } from '@angular/core';\n\n/** Formats a number as Indian Rupees, e.g. 1234.5 -> ₹1,234.50 */\n@Pipe({ name: 'money', standalone: true })\nexport class MoneyPipe implements PipeTransform {\n  transform(value: number | null | undefined, symbol = '₹', decimals = 2): string {\n    const n = Number(value ?? 0);\n    return symbol + n.toLocaleString('en-IN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });\n  }\n}\n"],
+  "mappings": ";;;;;AAIM,IAAO,YAAP,MAAO,WAAS;EACpB,UAAU,OAAkC,SAAS,UAAK,WAAW,GAAC;AACpE,UAAM,IAAI,OAAO,SAAS,CAAC;AAC3B,WAAO,SAAS,EAAE,eAAe,SAAS,EAAE,uBAAuB,UAAU,uBAAuB,SAAQ,CAAE;EAChH;;qCAJW,YAAS;EAAA;oFAAT,YAAS,MAAA,MAAA,YAAA,KAAA,CAAA;;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["charts.ts"],
+  "sourcesContent": ["\n    .bars { display:flex; flex-direction:column; gap:14px; }\n    .brow { display:grid; grid-template-columns: 150px 1fr 46px; align-items:center; gap:12px; }\n    .lbl { font-size:13px; }\n    .track { background: var(--hover); border-radius:6px; height:10px; overflow:hidden; }\n    .fill { height:100%; background: linear-gradient(90deg, var(--orange), var(--orange-dark)); border-radius:6px; transition: width .4s; }\n    .val { font-size:13px; font-weight:600; text-align:right; font-variant-numeric: tabular-nums; }\n    @media (max-width:600px){ .brow { grid-template-columns: 110px 1fr 40px; } }\n  "],
+  "mappings": ";AACI,CAAA;AAAQ,WAAA;AAAc,kBAAA;AAAuB,OAAA;;AAC7C,CAAA;AAAQ,WAAA;AAAc,yBAAA,MAAA,IAAA;AAAuC,eAAA;AAAoB,OAAA;;AACjF,CAAA;AAAO,aAAA;;AACP,CAAA;AAAS,cAAA,IAAA;AAA0B,iBAAA;AAAmB,UAAA;AAAa,YAAA;;AACnE,CAAA;AAAQ,UAAA;AAAa;IAAA;MAAA,KAAA;MAAA,IAAA,SAAA;MAAA,IAAA;AAAuE,iBAAA;AAAmB,cAAA,MAAA;;AAC/G,CAAA;AAAO,aAAA;AAAgB,eAAA;AAAiB,cAAA;AAAkB,wBAAA;;AAC1D,OAAA,CAAA,SAAA,EAAA;AAA0B,GAL1B;AAKkC,2BAAA,MAAA,IAAA;;;",
+  "names": []
+}

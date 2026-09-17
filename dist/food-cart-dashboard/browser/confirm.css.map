@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["confirm.ts"],
+  "sourcesContent": ["\n    .overlay { position:fixed; inset:0; background:rgba(17,24,39,.5); z-index:4000; display:flex;\n      align-items:center; justify-content:center; padding:16px; }\n    .box { background:var(--card); border-radius:var(--radius); padding:24px; width:100%; max-width:400px;\n      box-shadow:var(--shadow-lg); animation: toastIn .18s ease; }\n    h3 { font-size:18px; margin-bottom:8px; }\n    p { margin:0 0 20px; font-size:14px; }\n    .actions { display:flex; justify-content:flex-end; gap:10px; }\n  "],
+  "mappings": ";AACI,CAAA;AAAW,YAAA;AAAgB,SAAA;AAAS,cAAA,KAAA,EAAA,EAAA,EAAA,EAAA,EAAA,EAAA;AAA8B,WAAA;AAAc,WAAA;AAC9E,eAAA;AAAoB,mBAAA;AAAwB,WAAA;;AAC9C,CAAA;AAAO,cAAA,IAAA;AAAwB,iBAAA,IAAA;AAA6B,WAAA;AAAc,SAAA;AAAY,aAAA;AACpF,cAAA,IAAA;AAA6B,aAAA,QAAA,MAAA;;AAC/B;AAAK,aAAA;AAAgB,iBAAA;;AACrB;AAAI,UAAA,EAAA,EAAA;AAAiB,aAAA;;AACrB,CAAA;AAAW,WAAA;AAAc,mBAAA;AAA0B,OAAA;;",
+  "names": []
+}

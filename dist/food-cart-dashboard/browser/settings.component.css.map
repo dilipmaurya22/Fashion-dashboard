@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/settings/settings.component.scss"],
+  "sourcesContent": [".grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }\n.tg { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }\n.tg input { accent-color: var(--orange); width: 16px; height: 16px; }\n@media (max-width: 720px) { .grid-3 { grid-template-columns: 1fr; } }\n"],
+  "mappings": ";AAAA,CAAA;AAAU,WAAA;AAAe,yBAAA,OAAA,CAAA,EAAA;AAAuC,OAAA;;AAChE,CAAA;AAAM,WAAA;AAAe,eAAA;AAAqB,OAAA;AAAU,aAAA;AAAiB,eAAA;AAAkB,UAAA;;AACvF,CADA,GACA;AAAY,gBAAA,IAAA;AAA6B,SAAA;AAAa,UAAA;;AACtD,OAAA,CAAA,SAAA,EAAA;AAA4B,GAH5B;AAGsC,2BAAA;;;",
+  "names": []
+}
