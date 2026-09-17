@@ -1,0 +1,62 @@
+<div class="gsearch">
+  <div class="gs-box">
+    <app-icon name="search" [size]="18"></app-icon>
+    <input type="text" placeholder="Search billing, products, customers…"
+      [value]="query()" (input)="onInput($any($event.target).value)"
+      (focus)="query().trim().length >= 2 && open.set(true)" />
+    @if (query()) {
+      <button class="gs-clear" (click)="clearInput()" title="Clear"><app-icon name="close" [size]="15"></app-icon></button>
+    }
+  </div>
+
+  @if (open()) {
+    <div class="gs-backdrop" (click)="close()"></div>
+    <div class="gs-drop">
+      @if (loading()) {
+        <div class="gs-loading"><app-spinner [size]="20"></app-spinner></div>
+      } @else if (hasResults()) {
+        @if (orderResults().length) {
+          <div class="gs-sec">Billing</div>
+          @for (o of orderResults(); track o.id) {
+            <button class="gs-item" (click)="go(['/orders', o.id])">
+              <span class="gs-ic"><app-icon name="orders" [size]="16"></app-icon></span>
+              <span class="gs-main"><b>{{ o.orderNumber }}</b>
+                <span class="gs-sub">{{ o.customerName || 'Walk-in' }} • {{ o.itemCount }} items</span></span>
+              <span class="gs-right"><span class="gs-amt">{{ o.grandTotal | money }}</span>
+                <app-order-status [status]="o.status"></app-order-status></span>
+            </button>
+          }
+        }
+
+        @if (fashionResults().length) {
+          <div class="gs-sec">Products</div>
+          @for (f of fashionResults(); track f.id) {
+            <button class="gs-item" (click)="go(['/inventory'])">
+              <span class="gs-ic"><app-icon name="fashion" [size]="16"></app-icon></span>
+              <span class="gs-main"><b>{{ f.name }}</b>
+                <span class="gs-sub">{{ f.categoryName }} • {{ f.sku }}</span></span>
+              <span class="gs-right"><span class="gs-amt">{{ f.sellingPrice | money }}</span></span>
+            </button>
+          }
+        }
+
+        @if (customerResults().length) {
+          <div class="gs-sec">Customers</div>
+          @for (c of customerResults(); track c.id) {
+            <button class="gs-item" (click)="go(['/customers', c.id])">
+              <span class="gs-ic"><app-icon name="customers" [size]="16"></app-icon></span>
+              <span class="gs-main"><b>{{ c.name }}</b>
+                <span class="gs-sub">{{ c.mobileNumber || 'No mobile' }} • {{ c.totalOrders }} billing</span></span>
+              <span class="gs-right"><span class="gs-amt">{{ c.totalSpent | money }}</span></span>
+            </button>
+          }
+        }
+      } @else {
+        <div class="gs-empty">
+          <app-icon name="search" [size]="22"></app-icon>
+          <span>No results for “{{ query() }}”</span>
+        </div>
+      }
+    </div>
+  }
+</div>

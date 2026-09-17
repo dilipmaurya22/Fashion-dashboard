@@ -1,0 +1,42 @@
+<div class="page-head">
+  <div><h1 class="page-title">Business Settings</h1><p class="text-secondary">Your business profile and receipt details</p></div>
+  @if (isAdmin) { <a class="btn btn-secondary" routerLink="/settings/users"><app-icon name="users" [size]="18"></app-icon> Users & Roles</a> }
+</div>
+
+@if (loading()) { <app-loading></app-loading> }
+@else {
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <div class="card card-pad mb-16">
+      <h3 class="section-title mb-16">Business Profile</h3>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Business Name *</label>
+          <input class="form-control" formControlName="businessName" placeholder="e.g. New Look Fashion" maxlength="80"
+            [class.invalid]="form.controls.businessName.touched && form.controls.businessName.invalid"/>
+          @if (form.controls.businessName.touched && form.controls.businessName.invalid) { <div class="field-error">Business name is required.</div> }
+        </div>
+        <div class="form-group"><label class="form-label">Mobile</label>
+          <input class="form-control" formControlName="mobileNumber" placeholder="10-digit mobile number" inputmode="numeric" maxlength="10" (input)="onMobileInput($event)"
+            [class.invalid]="form.controls.mobileNumber.touched && form.controls.mobileNumber.invalid"/>
+          @if (form.controls.mobileNumber.touched && form.controls.mobileNumber.invalid) { <div class="field-error">Enter a valid 10-digit mobile number.</div> }
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Address</label>
+        <input class="form-control" formControlName="address" placeholder="Shop address (shown on receipts)"/></div>
+      <div class="form-group"><label class="form-label">GST Number</label>
+        <input class="form-control" formControlName="gstNumber" placeholder="e.g. 27AAAAA0000A1Z5" maxlength="15" (input)="onGstInput($event)"
+          [class.invalid]="form.controls.gstNumber.touched && form.controls.gstNumber.invalid"/>
+        @if (form.controls.gstNumber.touched && form.controls.gstNumber.invalid) { <div class="field-error">GST number must be 15 characters.</div> }
+      </div>
+      <div class="form-group"><label class="form-label">Receipt Footer</label>
+        <input class="form-control" formControlName="receiptFooter" placeholder="Thank-you note printed on receipts"/></div>
+    </div>
+
+    @if (isAdmin) {
+      <div class="flex" style="justify-content:flex-end">
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          @if (saving()) { <app-spinner [size]="16"></app-spinner> } @else { Save Settings }
+        </button>
+      </div>
+    } @else { <p class="text-secondary">Only an Admin can change business settings.</p> }
+  </form>
+}

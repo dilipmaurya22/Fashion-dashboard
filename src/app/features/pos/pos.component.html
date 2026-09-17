@@ -1,0 +1,307 @@
+<!-- STEP 1: SHOP (products + cart) — stays behind the customer drawer -->
+@if (step() !== 'checkout') {
+<div class="pos">
+  <!-- LEFT / MAIN -->
+  <div class="menu">
+    <!-- order tabs -->
+    <div class="ticket-bar">
+      <div class="tickets">
+        @for (t of tickets(); track t.uid) {
+          <button class="ticket" [class.active]="t.uid === activeUid()" (click)="selectTicket(t.uid)">
+            <span>Billing {{ t.uid }}</span>
+            @if (t.cart.length) { <span class="tc">{{ t.cart.length }}</span> }
+            <span class="x" (click)="closeTicket(t.uid, $event)"><app-icon name="close" [size]="13"></app-icon></span>
+          </button>
+        }
+      </div>
+      <div class="tb-right">
+        <div class="pos-search">
+          <app-icon name="search" [size]="17"></app-icon>
+          <input type="text" placeholder="Search products…" [ngModel]="search()" (ngModelChange)="search.set($event)" />
+        </div>
+        <button class="btn btn-primary new-order" (click)="newTicket()"><app-icon name="plus" [size]="16"></app-icon> New Billing</button>
+      </div>
+    </div>
+
+    <!-- category pills -->
+    <div class="cats">
+      <button class="cat" [class.active]="activeCategory() === null" (click)="selectCategory(null)">All Categories</button>
+      @for (c of categories(); track c.id) {
+        <button class="cat" [class.active]="activeCategory() === c.id" (click)="selectCategory(c.id)">{{ c.name }}</button>
+      }
+    </div>
+
+    @if (loading()) { <app-loading></app-loading> }
+    @else {
+      <div class="fashion-grid">
+        @for (f of filteredFashions(); track f.id) {
+          <div class="fashion-card">
+            <div class="thumb">
+              @if (showImage(f)) { <img [src]="f.imageUrl" [alt]="f.name" (error)="onImgError(f.id)" /> }
+              @else { <span class="emoji">{{ fashionEmoji(f) }}</span> }
+            </div>
+            <div class="f-body">
+              <div class="f-name">{{ f.name }}
+                @if (f.variants.length) { <span class="var-tag">{{ f.variants.length }} options</span> }
+              </div>
+              <div class="f-desc">{{ f.description || 'Premium quality.' }}</div>
+              <div class="f-foot">
+                <span class="f-price">
+                  @if (f.variants.length) {}{{ cardSelling(f) | money:'₹':0 }}
+                  @if (cardMrp(f) > cardSelling(f)) { <s class="f-mrp">{{ cardMrp(f) | money:'₹':0 }}</s> }
+                </span>
+                @if (!f.variants.length && qtyOf(f.id) > 0) {
+                  <div class="qty">
+                    <button (click)="changeQty(f.id, -1)"><app-icon name="minus" [size]="14"></app-icon></button>
+                    <span>{{ qtyOf(f.id) }}</span>
+                    <button (click)="changeQty(f.id, 1)"><app-icon name="plus" [size]="14"></app-icon></button>
+                  </div>
+                } @else {
+                  <button class="add-btn" (click)="add(f)"><app-icon name="plus" [size]="14"></app-icon> Add</button>
+                }
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <app-empty-state icon="fashion" title="No items found" message="Try another category or search."></app-empty-state>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- RIGHT / ORDER PANEL -->
+  <aside class="order-panel">
+    <div class="op-head">
+      <div>
+        <span class="op-label">Billing No.</span>
+        <div class="op-no">{{ billingNo() }}</div>
+      </div>
+    </div>
+
+    <div class="op-items">
+      @for (l of cart(); track $index) {
+        <div class="oi">
+          <span class="oi-qty">{{ l.qty }}x</span>
+          <div class="oi-main">
+            <span class="oi-name">{{ l.fashion.name }}@if (l.variant) { <span class="oi-var">· {{ l.variant.name }}</span> }</span>
+          </div>
+          <div class="oi-right">
+            <div class="qty sm">
+              <button (click)="changeQtyAt($index, -1)"><app-icon name="minus" [size]="12"></app-icon></button>
+              <span>{{ l.qty }}</span>
+              <button (click)="changeQtyAt($index, 1)"><app-icon name="plus" [size]="12"></app-icon></button>
+            </div>
+            <span class="oi-price">{{ (linePrice(l) * l.qty) | money:'₹':0 }}</span>
+          </div>
+        </div>
+      } @empty {
+        <div class="op-empty">
+          <app-icon name="cart" [size]="30"></app-icon>
+          <p class="text-secondary">Add items to start a billing</p>
+        </div>
+      }
+    </div>
+
+    @if (cart().length) {
+      <div class="op-totals">
+        <div class="tr"><span>MRP Total</span><span>{{ mrpTotal() | money }}</span></div>
+        @if (productDiscount() > 0) { <div class="tr disc"><span>Discount</span><span>− {{ productDiscount() | money }}</span></div> }
+        <div class="tr grand"><span>Total</span><span>{{ subtotal() | money }}</span></div>
+      </div>
+
+      <div class="op-actions">
+        <button class="btn btn-primary" (click)="proceedToCustomer()"><app-icon name="payment" [size]="16"></app-icon> Proceed</button>
+      </div>
+    }
+  </aside>
+</div>
+}
+
+<!-- STEP 2: CUSTOMER — slides in from the right over the dimmed cart -->
+@if (step() === 'customer') {
+  <div class="cust-drawer-overlay" (click)="backToShop()"></div>
+  <aside class="cust-drawer">
+      <div class="wiz-head">
+        <button class="wiz-back" (click)="backToShop()"><app-icon name="chevronDown" [size]="18" style="transform:rotate(90deg)"></app-icon></button>
+        <h3>Customer Details</h3>
+        <button class="wiz-skip" (click)="skipCustomer()">Skip</button>
+      </div>
+      <div class="wiz-body">
+        <div class="cust-search">
+          <app-icon name="search" [size]="18"></app-icon>
+          <input type="text" placeholder="Search customer by name or mobile…" [value]="custSearch()" (input)="onCustSearch($any($event.target).value)"/>
+        </div>
+
+        @if (custResults().length) {
+          <div class="cust-list">
+            @for (c of custResults(); track c.id) {
+              <button class="cust-row" [class.active]="selectedCustomer()?.id === c.id" (click)="pickCustomer(c)">
+                <div class="cr-avatar">{{ c.name.charAt(0) }}</div>
+                <div class="cr-main"><span class="cr-name">{{ c.name }}</span><span class="cr-sub">{{ c.mobileNumber || '—' }}</span></div>
+                @if (selectedCustomer()?.id === c.id) { <app-icon name="check" [size]="18"></app-icon> }
+              </button>
+            }
+          </div>
+        } @else if (custSearch()) {
+          <p class="text-secondary text-small" style="padding:6px 2px">No customer found — add a new one below.</p>
+        }
+
+        <div class="cust-new">
+          <div class="cn-title">New customer</div>
+          <div class="form-group"><label class="form-label">Name</label>
+            <input class="form-control" placeholder="e.g. Rahul Sharma" [value]="newCustName()" (input)="newCustName.set($any($event.target).value); clearCustomer()" maxlength="60"/></div>
+          <div class="form-group"><label class="form-label">Mobile Number</label>
+            <input class="form-control" placeholder="10-digit mobile number" inputmode="numeric" maxlength="10" [value]="newCustMobile()" (input)="onNewMobile($event); clearCustomer()"/></div>
+        </div>
+      </div>
+      <div class="wiz-foot">
+        <span class="text-secondary text-small">{{ cartCount() }} item{{ cartCount() === 1 ? '' : 's' }} · {{ grandTotal() | money }}</span>
+        <button class="btn btn-primary" (click)="goCheckout()">Proceed</button>
+      </div>
+  </aside>
+}
+
+<!-- STEP 3: CHECKOUT + PAYMENT -->
+@if (step() === 'checkout') {
+  <div class="checkout">
+    <!-- left: cart + totals -->
+    <div class="co-left card">
+      <div class="co-lhead">
+        <button class="wiz-back" (click)="backToShop()"><app-icon name="chevronDown" [size]="18" style="transform:rotate(90deg)"></app-icon> Back</button>
+        <button class="co-cancel" (click)="backToShop()">Cancel Order</button>
+      </div>
+      <div class="co-items">
+        @for (l of cart(); track $index) {
+          <div class="co-item">
+            <div class="ci-main">
+              <span class="ci-name">{{ l.fashion.name }}@if (l.variant) { <span class="ci-var">· {{ l.variant.name }}</span> }</span>
+              <span class="ci-mrp">MRP {{ (l.variant?.mrp ?? l.fashion.mrp) | money:'₹':0 }} · {{ linePrice(l) | money:'₹':0 }}</span>
+            </div>
+            <div class="qty sm">
+              <button (click)="changeQtyAt($index, -1)"><app-icon name="minus" [size]="12"></app-icon></button>
+              <span>{{ l.qty }}</span>
+              <button (click)="changeQtyAt($index, 1)"><app-icon name="plus" [size]="12"></app-icon></button>
+            </div>
+            <span class="ci-total">{{ (linePrice(l) * l.qty) | money:'₹':0 }}</span>
+            <button class="ib danger" (click)="changeQtyAt($index, -l.qty)"><app-icon name="trash" [size]="15"></app-icon></button>
+          </div>
+        }
+      </div>
+      <div class="co-summary">
+        <div class="cs-lines">
+          <div class="tr"><span>Sub Total</span><span>{{ subtotal() | money }}</span></div>
+          @if (productDiscount() > 0) { <div class="tr disc"><span>Product Discount</span><span>{{ productDiscount() | money }}</span></div> }
+          <div class="tr">
+            <span class="lbl-inline">Additional Discount
+              <select [value]="addlDiscMode()" (change)="addlDiscMode.set($any($event.target).value)"><option value="%">%</option><option value="₹">₹</option></select>
+            </span>
+            <input class="mini-input" type="number" min="0" placeholder="0" [value]="addlDisc() || ''" (input)="addlDisc.set(+$any($event.target).value || 0)"/>
+          </div>
+          <div class="tr"><span>Tax Amount</span><span>{{ tax() | money }}</span></div>
+        </div>
+        <div class="cs-total">
+          <span class="cs-items">{{ cartCount() }} item{{ cartCount() === 1 ? '' : 's' }}</span>
+          <span class="cs-tlabel">Total Amount</span>
+          <span class="cs-tamt">{{ grandTotal() | money }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- right: customer + payment -->
+    <div class="co-right">
+      <div class="card co-cust">
+        <h3>Customer Details</h3>
+        <div class="cd-grid">
+          <div class="cd-row"><span>Customer Name</span><b>{{ customerLabel() }}</b></div>
+          <div class="cd-row"><span>Mobile Number</span><b>{{ selectedCustomer()?.mobileNumber || newCustMobile() || '—' }}</b></div>
+          <div class="cd-row"><span>Total Orders</span><b>{{ selectedCustomer()?.totalOrders ?? '—' }}</b></div>
+          <div class="cd-row"><span>Total Spent</span><b>{{ selectedCustomer() ? (selectedCustomer()!.totalSpent | money) : '—' }}</b></div>
+          <div class="cd-row"><span>Last Visited</span><b>{{ selectedCustomer()?.lastOrderDate ? (selectedCustomer()!.lastOrderDate | date:'dd MMM yyyy') : '—' }}</b></div>
+        </div>
+      </div>
+      <div class="card co-pay">
+        <h3>Collect Payment</h3>
+        <p class="text-secondary" style="text-align:center;margin:4px 0 2px">Payment Pending</p>
+        <div class="pay-amt">{{ grandTotal() | money }}</div>
+        <div class="pay-label">Select Payment Mode</div>
+        <div class="pay-btns">
+          <button class="btn btn-primary" [disabled]="placing()" (click)="completeBilling('Cash')">
+            @if (placing()) { <app-spinner [size]="16"></app-spinner> } @else { <app-icon name="payment" [size]="16"></app-icon> Cash }
+          </button>
+          <button class="btn btn-primary" [disabled]="placing()" (click)="completeBilling('Online')">
+            @if (placing()) { <app-spinner [size]="16"></app-spinner> } @else { <app-icon name="payment" [size]="16"></app-icon> Online }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- variant picker -->
+@if (variantPickFor(); as f) {
+  <div class="modal-overlay" (click)="variantPickFor.set(null)">
+    <div class="modal variant-modal" (click)="$event.stopPropagation()">
+      <div class="modal-head"><h3>Choose option — {{ f.name }}</h3>
+        <button class="close-x" (click)="variantPickFor.set(null)"><app-icon name="close"></app-icon></button></div>
+      <div class="modal-body">
+        <div class="var-list">
+          @for (v of f.variants; track v.id) {
+            <button class="var-opt" (click)="addVariant(f, v)">
+              <span class="vo-name">{{ v.name }}</span>
+              <span class="vo-price">{{ v.price | money:'₹':0 }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- payment modal -->
+@if (paymentOpen()) {
+  <div class="modal-overlay" (click)="paymentOpen.set(false)">
+    <div class="modal pay-modal" (click)="$event.stopPropagation()">
+      <div class="modal-head"><h3>Take Payment</h3>
+        <button class="close-x" (click)="paymentOpen.set(false)"><app-icon name="close"></app-icon></button></div>
+      <div class="modal-body">
+        <div class="pay-total">
+          <span class="text-secondary">Amount due</span>
+          <div class="pay-amt">{{ total() | money }}</div>
+        </div>
+        <label class="form-label">Payment Method</label>
+        <div class="pay-methods">
+          @for (m of ['Cash','Upi','Card','Other']; track m) {
+            <button class="pm" [class.active]="paymentMethod() === m" (click)="paymentMethod.set($any(m))">
+              {{ m === 'Upi' ? 'UPI' : m }}
+            </button>
+          }
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" (click)="paymentOpen.set(false)">Cancel</button>
+        <button class="btn btn-primary" (click)="confirmPayment()" [disabled]="placing()">
+          @if (placing()) { <app-spinner [size]="16"></app-spinner> } @else { Confirm • {{ total() | money }} }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- printable bill (client-side, hidden until print) -->
+<div id="bill-print-area" class="bill-print">
+  <div class="b-center b-biz">New Look Fashion</div>
+  <div class="b-center b-small">{{ active().orderType === 'DineIn' ? 'In-Store' : active().orderType === 'Takeaway' ? 'Pickup' : 'Delivery' }}</div>
+  <div class="b-dash"></div>
+  @for (l of cart(); track l.fashion.id) {
+    <div class="b-row"><span>{{ l.qty }}x {{ l.fashion.name }}{{ l.variant ? ' (' + l.variant.name + ')' : '' }}</span><span>₹{{ (linePrice(l) * l.qty).toFixed(2) }}</span></div>
+  }
+  <div class="b-dash"></div>
+  <div class="b-row"><span>MRP Total</span><span>₹{{ mrpTotal().toFixed(2) }}</span></div>
+  @if (productDiscount() > 0) { <div class="b-row"><span>Discount</span><span>- ₹{{ productDiscount().toFixed(2) }}</span></div> }
+  <div class="b-row b-total"><span>TOTAL</span><span>₹{{ subtotal().toFixed(2) }}</span></div>
+  <div class="b-center b-foot">Bill — not a payment receipt</div>
+</div>
+
+@if (receiptOrderId(); as id) {
+  <app-receipt-dialog [orderId]="id" [showComplete]="true" (closed)="onReceiptClosed()"></app-receipt-dialog>
+}

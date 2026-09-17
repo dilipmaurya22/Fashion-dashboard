@@ -1,0 +1,32 @@
+/* ---- fixed header + search; only the product list scrolls ---- */
+:host > .card { display: flex; flex-direction: column; overflow: hidden; }
+:host > .card > .filters { flex: none; }
+:host > .card > app-paginator { flex: none; }
+/* the rows area is the only scroll region — capped to the viewport so header/search stay put */
+:host > .card > .table-wrap { flex: 1 1 auto; overflow-y: auto; max-height: calc(100vh - 300px); }
+/* keep the column headers visible while rows scroll under them */
+:host > .card > .table-wrap table.data thead th { position: sticky; top: 0; z-index: 2; background: var(--card); }
+
+.adj-cur { padding: 10px 14px; background: var(--bg); border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+.adj-preview { padding: 12px 14px; background: var(--orange-soft); color: var(--orange-dark); border-radius: 8px; font-weight: 600; }
+.adj-preview.reduce { background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger); }
+
+.adj-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.adj-mode { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 11px 12px;
+  border-radius: 10px; border: 1.5px solid var(--border); background: var(--card); color: var(--text-secondary);
+  font-weight: 700; font-size: 14px; cursor: pointer; transition: all .15s; }
+.adj-mode:hover { background: var(--hover); }
+.adj-mode.add.active { border-color: var(--success); color: var(--success);
+  background: color-mix(in srgb, var(--success) 12%, transparent); }
+.adj-mode.reduce.active { border-color: var(--danger); color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, transparent); }
+.field-error { color: var(--danger); font-size: 12.5px; font-weight: 600; margin: -8px 0 10px; }
+.var-count { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 20px; font-size: 11px;
+  font-weight: 700; background: var(--orange-soft); color: var(--orange-dark); vertical-align: middle; }
+
+/* product thumbnail in list */
+.c-img { width: 56px; }
+.ithumb { width: 60px; height: 60px; border-radius: 10px; background: var(--hover); border: 1px solid var(--border);
+  display: grid; place-items: center; overflow: hidden; }
+.ithumb img { width: 100%; height: 100%; object-fit: contain; }
+.iemoji { font-size: 22px; line-height: 1; }

@@ -1,0 +1,77 @@
+<a class="back" routerLink="/orders"><app-icon name="chevronDown" [size]="16" style="transform:rotate(90deg)"></app-icon> Back to Orders</a>
+
+@if (loading()) {
+  <app-loading></app-loading>
+} @if (order(); as o) {
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">{{ o.orderNumber }}</h1>
+      <p class="text-secondary">{{ o.orderDate | date:'EEEE, dd MMM yyyy • h:mm a' }}</p>
+    </div>
+    <div class="flex gap-8 items-center">
+      <app-order-status [status]="o.status"></app-order-status>
+      <button class="btn btn-secondary" (click)="showReceipt.set(true)"><app-icon name="print" [size]="16"></app-icon> Receipt</button>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <!-- items -->
+    <div class="card">
+      <div class="card-pad"><h3 class="section-title">Billing Items</h3></div>
+      <div class="table-wrap">
+        <table class="data">
+          <thead><tr><th>Item</th><th>Price</th><th>Qty</th><th class="ar">Subtotal</th></tr></thead>
+          <tbody>
+            @for (i of o.items; track i.id) {
+              <tr><td><b>{{ i.fashionName }}</b>@if (i.variantName) { <span class="ovar">· {{ i.variantName }}</span> }</td><td>{{ i.unitPrice | money }}</td><td>{{ i.quantity }}</td>
+                <td class="ar mono">{{ i.lineTotal | money }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="totals">
+        @if (mrpTotal() > o.subtotal) { <div class="tr"><span>MRP Total</span><span>{{ mrpTotal() | money }}</span></div> }
+        @if (productDiscount() > 0) { <div class="tr"><span>Product Discount</span><span>- {{ productDiscount() | money }}</span></div> }
+        <div class="tr"><span>Subtotal</span><span>{{ o.subtotal | money }}</span></div>
+        @if (o.discountAmount > 0) { <div class="tr"><span>Extra Discount</span><span>- {{ o.discountAmount | money }}</span></div> }
+        <div class="tr"><span>Tax</span><span>{{ o.taxAmount | money }}</span></div>
+        <div class="tr grand"><span>Total</span><span>{{ o.grandTotal | money }}</span></div>
+      </div>
+    </div>
+
+    <!-- info + actions -->
+    <div class="side">
+      <div class="card card-pad">
+        <h3 class="section-title mb-16">Details</h3>
+        <div class="info"><span>Customer</span><b>{{ o.customerName || 'Walk-in' }}</b></div>
+        @if (o.customerMobile) { <div class="info"><span>Mobile</span><b>{{ o.customerMobile }}</b></div> }
+        <div class="info"><span>Billing Type</span><b>{{ o.orderType }}</b></div>
+        @if (o.tableNumber) { <div class="info"><span>Table No.</span><b>{{ o.tableNumber }}</b></div> }
+        <div class="info"><span>Payment</span><b>{{ o.payment?.method || '—' }}</b></div>
+        <div class="info"><span>Payment Status</span>
+          <span class="badge" [class.badge-success]="o.payment?.status === 'Paid'" [class.badge-warning]="o.payment?.status !== 'Paid'">{{ o.payment?.status || '—' }}</span></div>
+        <div class="info"><span>Inventory</span>
+          <span class="badge" [class.badge-success]="o.inventoryDeducted" [class.badge-neutral]="!o.inventoryDeducted">
+            {{ o.inventoryDeducted ? 'Deducted' : 'Not yet' }}</span></div>
+        <div class="info"><span>Created By</span><b>{{ o.createdBy || '—' }}</b></div>
+      </div>
+
+      @if (!isFinal()) {
+        <div class="card card-pad">
+          <h3 class="section-title mb-16">Actions</h3>
+          <div class="actions">
+            @if (can('Preparing')) { <button class="btn btn-secondary btn-block" [disabled]="busy()" (click)="setStatus('Preparing')">Mark Preparing</button> }
+            @if (can('Ready')) { <button class="btn btn-secondary btn-block" [disabled]="busy()" (click)="setStatus('Ready')">Mark Ready</button> }
+            <button class="btn btn-success btn-block" [disabled]="busy()" (click)="complete()"><app-icon name="check" [size]="16"></app-icon> Complete Order</button>
+            <button class="btn btn-danger btn-block" [disabled]="busy()" (click)="cancel()"><app-icon name="close" [size]="16"></app-icon> Cancel Order</button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (showReceipt()) {
+    <app-receipt-dialog [orderId]="o.id" [showComplete]="o.status !== 'Completed' && o.status !== 'Cancelled'"
+      (closed)="showReceipt.set(false); $event && load()"></app-receipt-dialog>
+  }
+}

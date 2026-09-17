@@ -1,0 +1,88 @@
+<div class="page-head">
+  <div><h1 class="page-title">Analytics</h1><p class="text-secondary">Business performance · {{ rangeLabel() }}</p></div>
+  <div class="range-bar">
+    <div class="range-tabs">
+      @for (r of ranges; track r.k) {
+        <button [class.active]="range() === r.k" (click)="setRange(r.k)">{{ r.label }}</button>
+      }
+    </div>
+    @if (range() === 'custom') {
+      <div class="range-custom">
+        <input type="date" [ngModel]="from()" (ngModelChange)="from.set($event)" [max]="to()"/>
+        <span>–</span>
+        <input type="date" [ngModel]="to()" (ngModelChange)="to.set($event)" [min]="from()"/>
+        <button class="btn btn-primary btn-sm" (click)="applyCustom()">Apply</button>
+      </div>
+    }
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="analytics-loading"><app-loading></app-loading></div>
+} @else if (data()) {
+  <!-- KPI row -->
+  <div class="kpi-row">
+    @for (k of kpis(); track k.label) {
+      <div class="card card-pad kpi">
+        <span class="kpi-ic {{ k.tone }}"><app-icon [name]="k.icon" [size]="20"></app-icon></span>
+        <div class="kpi-txt">
+          <span class="kpi-label">{{ k.label }}</span>
+          <div class="kpi-value"><span [appCountUp]="k.value" [cuMoney]="k.money" [cuDecimals]="k.money ? 2 : 0"></span></div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- charts -->
+  <div class="grid-2">
+    <div class="card card-pad">
+      <div class="ac-head">
+        <div><h3 class="section-title">Sales</h3><p class="text-secondary text-small">{{ rangeLabel() }} revenue</p></div>
+        <div class="ac-total"><span class="text-secondary text-small">Total</span><b>{{ salesTotal() | money }}</b></div>
+      </div>
+      <app-line-chart [data]="sales()"></app-line-chart>
+    </div>
+
+    <div class="card card-pad">
+      <div class="ac-head">
+        <div><h3 class="section-title">Top Selling</h3><p class="text-secondary text-small">By units sold · {{ rangeLabel() }}</p></div>
+      </div>
+      <div class="top-list">
+        @for (t of topSelling(); track t.name; let i = $index) {
+          <div class="top-item">
+            <span class="rank r{{ i + 1 }}">{{ i + 1 }}</span>
+            <div class="ti-main">
+              <div class="ti-top">
+                <span class="ti-name">{{ t.name }}</span>
+                <span class="ti-qty">{{ t.quantitySold }} sold</span>
+              </div>
+              <div class="ti-bar"><div class="ti-fill" [style.width.%]="t.pct"></div></div>
+            </div>
+            <span class="ti-rev">{{ t.revenue | money:'₹':0 }}</span>
+          </div>
+        } @empty {
+          <p class="text-secondary" style="padding:24px 0;text-align:center">No sales yet.</p>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- report links -->
+  <div class="grid-3 mt-16">
+    <a class="card card-pad rep" routerLink="/reports/sales">
+      <span class="r-ic"><app-icon name="sales" [size]="22"></app-icon></span>
+      <div class="txt"><b>Sales Report</b><span class="text-secondary text-small">Revenue, payments, trend</span></div>
+      <app-icon class="r-arrow" name="chevronDown" [size]="18"></app-icon>
+    </a>
+    <a class="card card-pad rep" routerLink="/reports/inventory">
+      <span class="r-ic"><app-icon name="inventory" [size]="22"></app-icon></span>
+      <div class="txt"><b>Inventory Report</b><span class="text-secondary text-small">Value, wastage, usage</span></div>
+      <app-icon class="r-arrow" name="chevronDown" [size]="18"></app-icon>
+    </a>
+    <a class="card card-pad rep" routerLink="/reports/best-selling">
+      <span class="r-ic"><app-icon name="best" [size]="22"></app-icon></span>
+      <div class="txt"><b>Best Selling</b><span class="text-secondary text-small">Qty, revenue, profit</span></div>
+      <app-icon class="r-arrow" name="chevronDown" [size]="18"></app-icon>
+    </a>
+  </div>
+}

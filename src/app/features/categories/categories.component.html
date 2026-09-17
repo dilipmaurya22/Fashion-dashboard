@@ -1,0 +1,160 @@
+<div class="page-head">
+  <div><h1 class="page-title">Categories</h1><p class="text-secondary">Organize your catalog into categories</p></div>
+  @if (tab() === 'categories') {
+    <button class="btn btn-primary" (click)="add()"><app-icon name="plus" [size]="18"></app-icon> Add Category</button>
+  } @else {
+    <button class="btn btn-primary" (click)="addSub()"><app-icon name="plus" [size]="18"></app-icon> Add Subcategory</button>
+  }
+</div>
+
+<div class="cat-tabs">
+  <button [class.active]="tab() === 'categories'" (click)="setTab('categories')">Category</button>
+  <button [class.active]="tab() === 'subcategories'" (click)="setTab('subcategories')">Subcategory</button>
+</div>
+
+<!-- ============ CATEGORIES TAB ============ -->
+@if (tab() === 'categories') {
+  <div class="cat-filters">
+    <div class="search-box"><app-icon name="search" [size]="18"></app-icon>
+      <input type="text" placeholder="Search categories…" [value]="catSearch()" (input)="catSearch.set($any($event.target).value)"/></div>
+  </div>
+  @if (loading()) { <app-loading></app-loading> }
+  @else if (filteredCats().length) {
+    <div class="cat-grid">
+      @for (c of filteredCats(); track c.id) {
+        <div class="cat-card">
+          <div class="cat-thumb" [attr.data-hue]="hue(c)">
+            @if (showImage(c)) { <img [src]="c.imageUrl" [alt]="c.name" (error)="onImgError(c.id)" /> }
+            @else { <span class="emoji">{{ catEmoji(c.name) }}</span> }
+          </div>
+          <div class="cat-body">
+            <div class="cat-top">
+              <span class="cat-name">{{ c.name }}</span>
+              <span class="badge" [class.badge-success]="c.isActive" [class.badge-neutral]="!c.isActive">{{ c.isActive ? 'Active' : 'Inactive' }}</span>
+            </div>
+            <span class="cat-meta">{{ c.fashionItemCount }} item{{ c.fashionItemCount === 1 ? '' : 's' }} • Order {{ c.sortOrder }}</span>
+          </div>
+          <div class="cat-actions">
+            <button class="ib" (click)="edit(c)" title="Edit"><app-icon name="edit" [size]="16"></app-icon></button>
+            <button class="ib danger" (click)="remove(c)" title="Delete"><app-icon name="trash" [size]="16"></app-icon></button>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (catSearch()) {
+    <div class="card"><app-empty-state icon="category" title="No matches" message="No categories match your search."></app-empty-state></div>
+  } @else {
+    <div class="card"><app-empty-state icon="category" title="No categories yet" message="Create your first category."></app-empty-state></div>
+  }
+}
+
+<!-- ============ SUBCATEGORIES TAB ============ -->
+@if (tab() === 'subcategories') {
+  <div class="cat-filters">
+    <div class="search-box"><app-icon name="search" [size]="18"></app-icon>
+      <input type="text" placeholder="Search subcategories…" [value]="subSearch()" (input)="subSearch.set($any($event.target).value)"/></div>
+    <select class="form-control filt" [value]="subCatFilter()" (change)="subCatFilter.set($any($event.target).value)">
+      <option value="">All Categories</option>
+      @for (c of items(); track c.id) { <option [value]="$any(c.id) + ''">{{ c.name }}</option> }
+    </select>
+  </div>
+  @if (subLoading()) { <app-loading></app-loading> }
+  @else if (filteredSubs().length) {
+    <div class="cat-grid">
+      @for (s of filteredSubs(); track s.id) {
+        <div class="cat-card">
+          <div class="cat-thumb" [attr.data-hue]="0"><span class="emoji">{{ catEmoji(s.categoryName) }}</span></div>
+          <div class="cat-body">
+            <div class="cat-top">
+              <span class="cat-name">{{ s.name }}</span>
+              <span class="badge" [class.badge-success]="s.isActive" [class.badge-neutral]="!s.isActive">{{ s.isActive ? 'Active' : 'Inactive' }}</span>
+            </div>
+            <span class="cat-meta">{{ s.categoryName }} • {{ s.productCount }} product{{ s.productCount === 1 ? '' : 's' }}</span>
+          </div>
+          <div class="cat-actions">
+            <button class="ib" (click)="editSub(s)" title="Edit"><app-icon name="edit" [size]="16"></app-icon></button>
+            <button class="ib danger" (click)="removeSub(s)" title="Delete"><app-icon name="trash" [size]="16"></app-icon></button>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (subSearch() || subCatFilter()) {
+    <div class="card"><app-empty-state icon="category" title="No matches" message="No subcategories match your filter."></app-empty-state></div>
+  } @else {
+    <div class="card"><app-empty-state icon="category" title="No subcategories yet" message="Add a subcategory under a category (e.g. T-Shirts under Men's)."></app-empty-state></div>
+  }
+}
+
+<!-- Category modal -->
+@if (modalOpen()) {
+  <div class="modal-overlay" (click)="modalOpen.set(false)">
+    <div class="modal" style="max-width:460px" (click)="$event.stopPropagation()">
+      <div class="modal-head"><h3>{{ editId() ? 'Edit' : 'Add' }} Category</h3>
+        <button class="close-x" (click)="modalOpen.set(false)"><app-icon name="close"></app-icon></button></div>
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Category Image</label>
+            @if (form.value.imageUrl) {
+              <div class="img-preview">
+                <img [src]="form.value.imageUrl" alt="preview"/>
+                <button type="button" class="img-remove" (click)="clearImage()" title="Remove"><app-icon name="close" [size]="14"></app-icon></button>
+              </div>
+            } @else {
+              <label class="img-drop">
+                <app-icon name="image" [size]="22"></app-icon>
+                <span>Upload image</span>
+                <input type="file" accept="image/*" (change)="onFile($event)" hidden/>
+              </label>
+            }
+          </div>
+
+          <div class="form-group"><label class="form-label">Name *</label>
+            <input class="form-control" formControlName="name" placeholder="e.g. Men's, Women's, Kids" maxlength="50" [class.invalid]="form.controls.name.touched && form.controls.name.invalid"/>
+            @if (form.controls.name.touched && form.controls.name.invalid) { <div class="field-error">Category name is required.</div> }</div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Sort Order</label>
+              <input class="form-control" type="number" formControlName="sortOrder"/></div>
+            <div class="form-group"><label class="form-label">Status</label>
+              <label class="tg" style="margin-top:10px"><input type="checkbox" formControlName="isActive"/> Active</label></div>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" (click)="modalOpen.set(false)">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="saving()">
+            @if (saving()) { <app-spinner [size]="16"></app-spinner> } @else { Save }</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Subcategory modal -->
+@if (subModalOpen()) {
+  <div class="modal-overlay" (click)="subModalOpen.set(false)">
+    <div class="modal" style="max-width:460px" (click)="$event.stopPropagation()">
+      <div class="modal-head"><h3>{{ subEditId() ? 'Edit' : 'Add' }} Subcategory</h3>
+        <button class="close-x" (click)="subModalOpen.set(false)"><app-icon name="close"></app-icon></button></div>
+      <form [formGroup]="subForm" (ngSubmit)="saveSub()">
+        <div class="modal-body">
+          <div class="form-group"><label class="form-label">Parent Category *</label>
+            <select class="form-control" formControlName="categoryId" [class.invalid]="subForm.controls.categoryId.touched && subForm.controls.categoryId.invalid">
+              <option [ngValue]="null" disabled>Select category</option>
+              @for (c of items(); track c.id) { <option [ngValue]="$any(c.id) + ''">{{ c.name }}</option> }
+            </select>
+            @if (subForm.controls.categoryId.touched && subForm.controls.categoryId.invalid) { <div class="field-error">Please select a parent category.</div> }</div>
+          <div class="form-group"><label class="form-label">Subcategory Name *</label>
+            <input class="form-control" formControlName="name" placeholder="e.g. T-Shirts, Jeans, Sarees" maxlength="50" [class.invalid]="subForm.controls.name.touched && subForm.controls.name.invalid"/>
+            @if (subForm.controls.name.touched && subForm.controls.name.invalid) { <div class="field-error">Subcategory name is required.</div> }</div>
+          <div class="form-group"><label class="form-label">Status</label>
+            <label class="tg" style="margin-top:6px"><input type="checkbox" formControlName="isActive"/> Active</label></div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" (click)="subModalOpen.set(false)">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="subSaving()">
+            @if (subSaving()) { <app-spinner [size]="16"></app-spinner> } @else { Save }</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

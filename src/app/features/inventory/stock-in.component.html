@@ -1,0 +1,38 @@
+<a class="back" routerLink="/inventory"><app-icon name="chevronDown" [size]="16" style="transform:rotate(90deg)"></app-icon> Back to Inventory</a>
+
+<div class="page-head"><div><h1 class="page-title">Stock In</h1><p class="text-secondary">Record a purchase — inventory increases automatically</p></div></div>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <div class="card">
+    <div class="card-pad flex justify-between items-center">
+      <h3 class="section-title">Items</h3>
+      <button type="button" class="btn btn-secondary btn-sm" (click)="addRow()"><app-icon name="plus" [size]="14"></app-icon> Add Item</button>
+    </div>
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Product</th><th>Quantity</th><th>Unit</th><th>Cost / Unit</th><th>Line Total</th><th></th></tr></thead>
+        <tbody formArrayName="items">
+          @for (row of items.controls; track $index) {
+            <tr [formGroupName]="$index">
+              <td><select class="form-control" formControlName="ingredientId" (change)="onPickIngredient($index)">
+                <option [ngValue]="null" disabled>Select</option>
+                @for (i of ingredients(); track i.id) { <option [ngValue]="i.id">{{ i.name }}</option> }
+              </select></td>
+              <td><input class="form-control sm" type="number" step="1" min="1" inputmode="numeric" formControlName="quantity" (input)="sanitizeQty($index)" (keydown)="$event.key === '.' || $event.key === ',' || $event.key === 'e' ? $event.preventDefault() : null"/></td>
+              <td class="text-secondary">{{ unitFor(items.at($index).get('ingredientId')?.value) }}</td>
+              <td><input class="form-control sm" type="number" step="0.0001" formControlName="costPerUnit"/></td>
+              <td class="mono"><b>{{ lineTotal($index) | money }}</b></td>
+              <td><button type="button" class="ib danger" (click)="removeRow($index)"><app-icon name="trash" [size]="15"></app-icon></button></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="foot">
+      <div class="grand">Total: <b>{{ grandTotal() | money }}</b></div>
+      <button type="submit" class="btn btn-primary" [disabled]="saving()">
+        @if (saving()) { <app-spinner [size]="16"></app-spinner> } @else { <app-icon name="stockin" [size]="16"></app-icon> Add Stock }
+      </button>
+    </div>
+  </div>
+</form>

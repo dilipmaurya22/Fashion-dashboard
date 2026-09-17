@@ -1,0 +1,36 @@
+.overlay { position: fixed; inset: 0; background: rgba(17,24,39,.5); z-index: 2000; display: flex;
+  align-items: center; justify-content: center; padding: 16px; }
+.dialog { background: var(--card); border-radius: var(--radius); width: 100%; max-width: 360px; max-height: 92vh;
+  overflow-y: auto; box-shadow: var(--shadow-lg); }
+.dialog-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--border); }
+.dialog-head h3 { font-size: 16px; }
+.close { width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); }
+.close:hover { background: var(--hover); }
+
+.receipt {
+  font-family: 'Courier New', monospace; background: #fff; color: #000; width: 300px; margin: 18px auto;
+  padding: 16px; font-size: 12px; line-height: 1.5;
+}
+.r-center { text-align: center; }
+.r-biz { font-size: 16px; font-weight: 700; letter-spacing: .04em; }
+.r-small { font-size: 11px; }
+.dash { border-top: 1px dashed #000; margin: 8px 0; }
+.r-row { display: flex; justify-content: space-between; gap: 8px; }
+.r-iname { font-weight: 700; }
+.r-item { margin-bottom: 4px; }
+.r-total { font-size: 15px; font-weight: 700; margin-top: 4px; }
+.r-footer { margin-top: 10px; font-weight: 700; }
+
+.actions { display: flex; gap: 8px; padding: 16px 18px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+.actions .btn { flex: 1; }
+.loading-r { padding: 48px; display: flex; justify-content: center; }
+
+/* print isolation lives in global styles.scss (scoped CSS can't hide the rest of the app) */
+
+/* printer connect bar */
+.printer-bar { padding: 12px 18px 0; }
+.pr-status { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-secondary); font-weight: 500; }
+.pr-status.ok { color: var(--success); font-weight: 600; }
+.pr-connect { display: flex; flex-direction: column; gap: 8px; }
+.pr-btns { display: flex; gap: 8px; }
+.pr-btns .btn { flex: 1; }

@@ -1,0 +1,154 @@
+<div class="page-head">
+  <div><h1 class="page-title">Inventory</h1><p class="text-secondary">Track product stock levels and value</p></div>
+  <div class="flex gap-8">
+    <a class="btn btn-secondary" routerLink="/inventory/stock-in"><app-icon name="stockin" [size]="18"></app-icon> Stock In</a>
+    <button class="btn btn-primary" (click)="openProduct()"><app-icon name="plus" [size]="18"></app-icon> Add Product</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="filters">
+    <div class="search-box"><app-icon name="search" [size]="18"></app-icon>
+      <input type="text" placeholder="Search product or SKU…" (input)="onSearch($any($event.target).value)"/></div>
+    <select class="form-control filt" [ngModel]="status()" (ngModelChange)="status.set($event); changeFilter()">
+      <option value="">All Status</option><option value="Available">Available</option>
+      <option value="Low Stock">Low Stock</option><option value="Out of Stock">Out of Stock</option>
+    </select>
+  </div>
+
+  @if (loading()) { <app-loading></app-loading> }
+  @if (result(); as r) {
+    @if (r.items.length) {
+      <div class="table-wrap">
+        <table class="data">
+          <thead><tr><th class="c-img">Image</th><th>Product</th><th>SKU</th><th>Stock</th><th>Cost/Unit</th>
+           <th>Action</th></tr></thead>
+          <tbody>
+            @for (i of r.items; track i.id) {
+              <tr>
+                <td class="c-img"><span class="ithumb">
+                  @if (i.imageUrl && !imgErr().has(i.id)) { <img [src]="i.imageUrl" [alt]="i.name" (error)="onImgErr(i.id)"/> }
+                  @else { <span class="iemoji">{{ emoji(i.name) }}</span> }
+                </span></td>
+                <td><b>{{ i.name }}</b>@if ((i.variantCount ?? 1) > 1) { <span class="var-count">{{ i.variantCount }} variants</span> }</td>
+                <td class="text-secondary">{{ i.sku }}</td>
+                <td class="mono"><b>{{ i.currentStock }} </b>  <span class="text-secondary">{{ i.unit }}</span></td>
+            
+                <td class="mono">{{ i.costPerUnit | money:'₹':2 }}</td>
+                <!-- <td><app-stock-status [status]="i.status"></app-stock-status></td> -->
+                <td class="row-actions">
+                  <button class="ib" (click)="view(i)" title="View product"><app-icon name="eye" [size]="16"></app-icon></button>
+                  <button class="ib" (click)="openAdjust(i)" title="Adjust"><app-icon name="adjust" [size]="16"></app-icon></button>
+                  <button class="ib" (click)="editProduct(i)" title="Edit product"><app-icon name="edit" [size]="16"></app-icon></button>
+                  <button class="ib danger" (click)="remove(i)" title="Delete"><app-icon name="trash" [size]="16"></app-icon></button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <app-paginator [page]="r.page" [pageSize]="r.pageSize" [totalCount]="r.totalCount" [totalPages]="r.totalPages" (pageChange)="goPage($event)"></app-paginator>
+    } @else { <app-empty-state icon="inventory" title="No products" message="Add products to track your stock."></app-empty-state> }
+  }
+</div>
+
+<!-- ingredient modal -->
+@if (formOpen()) {
+  <div class="modal-overlay" (click)="formOpen.set(false)">
+    <div class="modal" style="max-width:480px" (click)="$event.stopPropagation()">
+      <div class="modal-head"><h3>{{ editId() ? 'Edit' : 'Add' }} Product</h3>
+        <button class="close-x" (click)="formOpen.set(false)"><app-icon name="close"></app-icon></button></div>
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Name *</label><input class="form-control" formControlName="name"/></div>
+            <div class="form-group"><label class="form-label">SKU *</label><input class="form-control" formControlName="sku"/></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Unit *</label>
+              <select class="form-control" formControlName="unit">
+                @for (u of ['g','kg','ml','l','piece']; track u) { <option [value]="u">{{ u }}</option> }
+              </select></div>
+            <div class="form-group"><label class="form-label">Cost / Unit *</label><input class="form-control" type="number" step="0.0001" formControlName="costPerUnit"/></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">{{ editId() ? 'Current Stock (read-only)' : 'Opening Stock' }}</label>
+              <input class="form-control" type="number" step="0.001" formControlName="currentStock" [readonly]="!!editId()"/></div>
+            <div class="form-group"><label class="form-label">Minimum Stock *</label><input class="form-control" type="number" step="0.001" formControlName="minimumStock"/></div>
+          </div>
+          @if (editId()) { <p class="text-secondary text-small">Use Stock In or Adjust to change current stock.</p> }
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" (click)="formOpen.set(false)">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="saving()">@if (saving()) { <app-spinner [size]="16"></app-spinner> } @else { Save }</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- adjustment modal -->
+@if (adjustOpen()) {
+  <div class="modal-overlay" (click)="adjustOpen.set(false)">
+    <div class="modal" style="max-width:440px" (click)="$event.stopPropagation()">
+      <div class="modal-head"><h3>Adjust Stock — {{ adjustProductName() }}</h3>
+        <button class="close-x" (click)="adjustOpen.set(false)"><app-icon name="close"></app-icon></button></div>
+      <form [formGroup]="adjustForm" (ngSubmit)="submitAdjust()">
+        <div class="modal-body">
+          @if (adjustVariants().length > 1) {
+            <div class="form-group"><label class="form-label">Variant</label>
+              <select class="form-control" [value]="adjustTarget()?.id ?? ''" (change)="pickVariant($any($event.target).value)">
+                <option value="" disabled>Select a variant…</option>
+                @for (v of adjustVariants(); track v.id) {
+                  <option [value]="v.id">{{ v.name.split(' · ')[1] || v.name }} — {{ v.currentStock }} {{ v.unit }}</option>
+                }
+              </select>
+            </div>
+          }
+          @if (adjustTarget(); as t) {
+            <div class="adj-cur">Current: <b>{{ t.currentStock }} {{ t.unit }}</b></div>
+          } @else {
+            <div class="adj-cur text-secondary">Select a variant above to adjust its stock.</div>
+          }
+
+          @if (adjustTarget()) {
+          <div class="adj-modes">
+            <button type="button" class="adj-mode add" [class.active]="adjustMode() === 'add'" (click)="setAdjustMode('add')">
+              <app-icon name="plus" [size]="15"></app-icon> Add Stock
+            </button>
+            <button type="button" class="adj-mode reduce" [class.active]="adjustMode() === 'reduce'" (click)="setAdjustMode('reduce')">
+              <app-icon name="minus" [size]="15"></app-icon> Reduce Stock
+            </button>
+          </div>
+
+          <div class="form-group"><label class="form-label">{{ adjustMode() === 'add' ? 'Quantity to add' : 'Quantity to reduce' }}</label>
+            <input class="form-control" type="number" min="1" step="1" formControlName="quantity" (input)="onQtyInput()" placeholder="0"/></div>
+          @if (adjustMode() === 'reduce' && adjustQty() > (adjustTarget()?.currentStock ?? 0)) {
+            <p class="field-error">Cannot reduce more than current stock ({{ adjustTarget()?.currentStock }}).</p>
+          }
+          <div class="form-group"><label class="form-label">Reason</label>
+            <select class="form-control" formControlName="reason">@for (r of reasonsFor(); track r) { <option [value]="r">{{ r }}</option> }</select></div>
+          <div class="form-group"><label class="form-label">Notes</label><input class="form-control" formControlName="notes"/></div>
+          <div class="adj-preview" [class.reduce]="adjustMode() === 'reduce'">New stock: <b>{{ newStockPreview() }} {{ adjustTarget()?.unit }}</b></div>
+          }
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" (click)="adjustOpen.set(false)">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="adjusting() || !canApply()">@if (adjusting()) { <app-spinner [size]="16"></app-spinner> } @else { {{ adjustMode() === 'add' ? 'Add Stock' : 'Reduce Stock' }} }</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (productFormOpen()) {
+  <app-fashion-form [fashionId]="$any(editProductId())" (saved)="onProductSaved()" (cancelled)="productFormOpen.set(false)"></app-fashion-form>
+}
+
+@if (detailOpen()) {
+  @if (detailItem(); as d) {
+    <app-fashion-detail [fashion]="d" (closed)="detailOpen.set(false)"></app-fashion-detail>
+  } @else if (detailLoading()) {
+    <div class="modal-overlay"><div class="modal" style="max-width:360px"><div style="padding:40px;text-align:center"><app-spinner [size]="22"></app-spinner></div></div></div>
+  }
+}

@@ -1,0 +1,4 @@
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.tg { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
+.tg input { accent-color: var(--orange); width: 16px; height: 16px; }
+@media (max-width: 720px) { .grid-3 { grid-template-columns: 1fr; } }

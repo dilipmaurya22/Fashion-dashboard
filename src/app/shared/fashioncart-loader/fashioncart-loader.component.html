@@ -1,0 +1,35 @@
+<div class="fc-loader" [class.fullscreen]="fullscreen"
+     role="status" aria-live="polite" aria-label="Loading FashionCart application">
+
+  <div class="stage">
+    <!-- rotating gradient ring -->
+    <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+      <defs>
+        <linearGradient id="fcRingGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#F97316"/>
+          <stop offset="100%" stop-color="#EA580C"/>
+        </linearGradient>
+      </defs>
+      <circle class="track" cx="50" cy="50" r="42" fill="none" stroke-width="6"/>
+      <circle class="arc" cx="50" cy="50" r="42" fill="none" stroke="url(#fcRingGrad)"
+              stroke-width="6" stroke-linecap="round" stroke-dasharray="150 264"/>
+    </svg>
+
+    <!-- subtle orbiting fashion particles -->
+    <div class="orbit" aria-hidden="true">
+      <span class="dot a"></span>
+      <span class="dot b"></span>
+      <span class="dot c"></span>
+    </div>
+
+    <!-- center fashion-cart icon -->
+    <div class="center" aria-hidden="true">
+      <div class="box"><app-icon name="fashion" [size]="26"></app-icon></div>
+    </div>
+  </div>
+
+  <div class="text">
+    <span class="t1">{{ label }}</span>
+    @if (subLabel) { <span class="t2">{{ subLabel }}</span> }
+  </div>
+</div>

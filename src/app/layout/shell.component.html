@@ -1,0 +1,87 @@
+<div class="shell">
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.open]="sidebarOpen()">
+    <div class="brand">
+      <img class="brand-logo" src="/New-look.png" style="width: 210px;" alt="New Look Fashion" />
+    </div>
+
+    <nav class="nav">
+      @for (item of visibleItems(); track item.label) {
+        @if (item.children) {
+          <!-- expandable parent -->
+          <button class="nav-item" [class.parent-active]="isParentActive(item)" (click)="toggle(item.label)">
+            <span class="nav-ic"><app-icon [name]="item.icon" [size]="19"></app-icon></span>
+            <span class="nav-label">{{ item.label }}</span>
+            @if (item.dot) { <span class="nav-dot"></span> }
+            @if (item.badge === 'pending' && pendingCount() > 0) { <span class="nav-badge">{{ pendingCount() }}</span> }
+            <span class="chev" [class.open]="isExpanded(item.label)"><app-icon name="chevronDown" [size]="16"></app-icon></span>
+          </button>
+          @if (isExpanded(item.label)) {
+            <div class="submenu">
+              @for (child of item.children; track child.route) {
+                <a class="sub-item" [routerLink]="child.route" routerLinkActive="active"
+                  [routerLinkActiveOptions]="{ exact: true }">{{ child.label }}</a>
+              }
+            </div>
+          }
+        } @else {
+          <!-- direct link -->
+          <a class="nav-item" [routerLink]="item.route" routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: !!item.exact }">
+            <span class="nav-ic"><app-icon [name]="item.icon" [size]="19"></app-icon></span>
+            <span class="nav-label">{{ item.label }}</span>
+            @if (item.dot) { <span class="nav-dot"></span> }
+            @if (item.badge === 'pending' && pendingCount() > 0) { <span class="nav-badge">{{ pendingCount() }}</span> }
+          </a>
+        }
+      }
+    </nav>
+
+    <!-- <div class="promo">
+      <div class="promo-emoji">🍔</div>
+      <p>Add new products to your catalog</p>
+      <a class="btn btn-primary btn-block" routerLink="/fashion-items">
+        <app-icon name="plus" [size]="16"></app-icon> Add Product
+      </a>
+    </div> -->
+  </aside>
+
+  @if (sidebarOpen()) { <div class="backdrop" (click)="toggleSidebar()"></div> }
+
+  <!-- Main -->
+  <div class="main">
+    <header class="header">
+      <button class="icon-btn menu-btn" (click)="toggleSidebar()"><app-icon name="menu"></app-icon></button>
+
+      <h2 class="page-name">{{ pageName() }}</h2>
+
+      <app-global-search></app-global-search>
+
+      <div class="spacer"></div>
+
+      <div class="datetime">{{ now() | date:'EEE, dd MMM • h:mm a' }}</div>
+
+      <button class="icon-btn" (click)="theme.toggle()" title="Toggle theme">
+        <app-icon [name]="theme.dark() ? 'sun' : 'moon'"></app-icon>
+      </button>
+      <!-- <button class="icon-btn soft" title="Messages"><app-icon name="bell"></app-icon></button> -->
+
+      <div class="profile">
+        <div class="avatar"><app-icon name="user" [size]="18"></app-icon></div>
+        <div class="who">
+          <div class="name">{{ auth.user()?.fullName }}</div>
+          <div class="role">{{ auth.user()?.role }}</div>
+        </div>
+        <button class="icon-btn" (click)="logout()" title="Logout"><app-icon name="logout" [size]="18"></app-icon></button>
+      </div>
+    </header>
+
+    <main class="content">
+      @if (connectivity.serverDown()) {
+        <app-server-down></app-server-down>
+      } @else {
+        <router-outlet></router-outlet>
+      }
+    </main>
+  </div>
+</div>

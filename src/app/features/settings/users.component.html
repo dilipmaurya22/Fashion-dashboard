@@ -1,0 +1,88 @@
+<a class="back" routerLink="/settings" style="display:inline-flex;align-items:center;gap:4px;color:var(--text-secondary);font-weight:600;font-size:13px;margin-bottom:16px">
+  <app-icon name="chevronDown" [size]="16" style="transform:rotate(90deg)"></app-icon> Back to Settings</a>
+
+<div class="page-head">
+  <div><h1 class="page-title">Users & Roles</h1><p class="text-secondary">Manage who can access the system</p></div>
+  <button class="btn btn-primary" (click)="add()"><app-icon name="plus" [size]="18"></app-icon> Add User</button>
+</div>
+
+@if (loading()) { <app-loading></app-loading> }
+@else {
+  <div class="card">
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          @for (u of users(); track u.id) {
+            <tr>
+              <td><b>{{ u.fullName }}</b></td>
+              <td class="text-secondary">{{ u.username }}</td>
+              <td class="text-secondary">{{ u.email }}</td>
+              <td><span class="badge {{ roleClass(u.role) }}">{{ u.role }}</span></td>
+              <td><span class="badge" [class.badge-success]="u.isActive" [class.badge-neutral]="!u.isActive">{{ u.isActive ? 'Active' : 'Inactive' }}</span></td>
+              <td class="row-actions">
+                <button class="ib" (click)="edit(u)"><app-icon name="edit" [size]="16"></app-icon></button>
+                <button class="ib danger" (click)="remove(u)"><app-icon name="trash" [size]="16"></app-icon></button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
+
+@if (modalOpen()) {
+  <div class="modal-overlay" (click)="modalOpen.set(false)">
+    <div class="modal" style="max-width:480px" (click)="$event.stopPropagation()">
+      <div class="modal-head"><h3>{{ editId() ? 'Edit' : 'Add' }} User</h3>
+        <button class="close-x" (click)="modalOpen.set(false)"><app-icon name="close"></app-icon></button></div>
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="modal-body">
+          <div class="form-group"><label class="form-label">Full Name *</label><input class="form-control" formControlName="fullName"/></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Username *</label><input class="form-control" formControlName="username"/></div>
+            <div class="form-group"><label class="form-label">Role *</label>
+              <select class="form-control" formControlName="role">@for (r of roles(); track r) { <option [value]="r">{{ r }}</option> }</select></div>
+          </div>
+          <div class="form-group"><label class="form-label">Email *</label><input class="form-control" formControlName="email"/></div>
+          @if (!editId()) {
+            <div class="form-group"><label class="form-label">Password *</label><input class="form-control" type="password" formControlName="password"/>
+              @if (form.controls.password.touched && form.controls.password.invalid) { <div class="field-error">Min 6 characters.</div> }</div>
+          } @else {
+            <label class="tg" style="display:flex;align-items:center;gap:8px;font-size:14px"><input type="checkbox" formControlName="isActive" style="accent-color:var(--orange)"/> Active</label>
+          }
+
+          <!-- what access the chosen role grants -->
+          <div style="margin-top:16px;border:1px solid var(--border);border-radius:10px;overflow:hidden">
+            <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg-secondary,#f5f6f8);font-weight:700;font-size:13px">
+              <app-icon name="check" [size]="15"></app-icon>
+              This role can access
+              <span style="margin-left:auto;font-weight:600;color:var(--text-secondary)">{{ selectedRole() }}</span>
+            </div>
+            @if (roleAccess().length) {
+              <div style="padding:10px 12px;display:flex;flex-direction:column;gap:10px;max-height:220px;overflow-y:auto">
+                @for (g of roleAccess(); track g.module) {
+                  <div>
+                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-secondary);margin-bottom:4px">{{ g.module }}</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px">
+                      @for (it of g.items; track it) {
+                        <span style="font-size:12px;background:rgba(56,142,60,.12);color:#2e7d32;border-radius:6px;padding:3px 8px">{{ it }}</span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="text-secondary" style="padding:12px;font-size:13px;margin:0">This role has no access configured.</p>
+            }
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" (click)="modalOpen.set(false)">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="saving()">@if (saving()) { <app-spinner [size]="16"></app-spinner> } @else { Save }</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

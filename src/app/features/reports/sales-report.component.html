@@ -1,0 +1,37 @@
+<div class="page-head">
+  <div><h1 class="page-title">Sales Report</h1><p class="text-secondary">Revenue, billing and payment breakdown</p></div>
+  <div class="range-tabs">
+    @for (r of ranges; track r.k) {
+      <button [class.active]="range() === r.k" (click)="setRange(r.k)">{{ r.l }}</button>
+    }
+  </div>
+</div>
+
+@if (loading()) { <app-loading></app-loading> }
+@if (data(); as d) {
+  <div class="rkpis">
+    <div class="card card-pad rkpi"><span class="lbl">Total Sales</span><b>{{ d.totalSales | money }}</b></div>
+    <div class="card card-pad rkpi"><span class="lbl">Total Billings</span><b>{{ d.totalOrders }}</b></div>
+    <div class="card card-pad rkpi"><span class="lbl">Avg Billing Value</span><b>{{ d.averageOrderValue | money }}</b></div>
+    <div class="card card-pad rkpi"><span class="lbl">Total Discount</span><b>{{ d.totalDiscount | money }}</b></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card card-pad">
+      <h3 class="section-title mb-16">Sales Trend</h3>
+      <app-line-chart [data]="series()"></app-line-chart>
+    </div>
+    <div class="card card-pad">
+      <h3 class="section-title mb-16">Payment Breakdown</h3>
+      <div class="pay-list">
+        @for (p of d.paymentBreakdown; track p.method) {
+          <div class="pay-row">
+            <span class="badge {{ methodClass(p.method) }}">{{ p.method === 'Upi' ? 'UPI' : p.method }}</span>
+            <span class="text-secondary text-small">{{ p.count }} billing</span>
+            <b class="mono">{{ p.amount | money }}</b>
+          </div>
+        } @empty { <p class="text-secondary">No payments in this period.</p> }
+      </div>
+    </div>
+  </div>
+}

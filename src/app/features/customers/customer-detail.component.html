@@ -1,0 +1,41 @@
+<a class="back" routerLink="/customers"><app-icon name="chevronDown" [size]="16" style="transform:rotate(90deg)"></app-icon> Back to Customers</a>
+
+@if (loading()) { <app-loading></app-loading> }
+@if (customer(); as c) {
+  <div class="profile-head">
+    <div class="avatar">{{ c.name.charAt(0).toUpperCase() }}</div>
+    <div>
+      <h1 class="page-title">{{ c.name }}</h1>
+      <p class="text-secondary">{{ c.mobileNumber || 'No mobile' }} @if (c.email) { • {{ c.email }} }</p>
+    </div>
+  </div>
+
+  <div class="grid-3 mb-24">
+    <div class="card card-pad stat"><span class="text-secondary text-small">Total Billings</span><b>{{ c.totalOrders }}</b></div>
+    <div class="card card-pad stat"><span class="text-secondary text-small">Total Spent</span><b>{{ c.totalSpent | money }}</b></div>
+    <div class="card card-pad stat"><span class="text-secondary text-small">Avg Billing Value</span><b>{{ avg() | money }}</b></div>
+  </div>
+
+  <div class="card">
+    <div class="card-pad"><h3 class="section-title">Billing History</h3></div>
+    @if (orders().length) {
+      <div class="table-wrap">
+        <table class="data">
+          <thead><tr><th>Billing</th><th>Date</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th></tr></thead>
+          <tbody>
+            @for (o of orders(); track o.id) {
+              <tr>
+                <td><a class="onum" [routerLink]="['/orders', o.id]">{{ o.orderNumber }}</a></td>
+                <td class="text-secondary">{{ o.orderDate | date:'dd MMM, h:mm a' }}</td>
+                <td>{{ o.itemCount }}</td>
+                <td class="mono"><b>{{ o.grandTotal | money }}</b></td>
+                <td>{{ o.paymentMethod || '—' }}</td>
+                <td><app-order-status [status]="o.status"></app-order-status></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else { <app-empty-state icon="orders" title="No billing yet" message=""></app-empty-state> }
+  </div>
+}

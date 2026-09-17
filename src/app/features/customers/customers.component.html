@@ -1,0 +1,65 @@
+<div class="page-head">
+  <div><h1 class="page-title">Customers</h1><p class="text-secondary">Your regulars and their billing history</p></div>
+  <button class="btn btn-primary" (click)="add()"><app-icon name="plus" [size]="18"></app-icon> Add Customer</button>
+</div>
+
+<div class="card">
+  <div class="filters">
+    <div class="search-box"><app-icon name="search" [size]="18"></app-icon>
+      <input type="text" placeholder="Search name or mobile…" (input)="onSearch($any($event.target).value)"/></div>
+  </div>
+
+  @if (loading()) { <app-loading></app-loading> }
+  @if (result(); as r) {
+    @if (r.items.length) {
+      <div class="table-wrap">
+        <table class="data">
+          <thead><tr><th>Name</th><th>Mobile</th><th>Billing</th><th>Total Spent</th><th>Last Billing</th><th></th></tr></thead>
+          <tbody>
+            @for (c of r.items; track c.id) {
+              <tr>
+                <td><a class="onum" [routerLink]="['/customers', c.id]">{{ c.name }}</a></td>
+                <td>{{ c.mobileNumber || '—' }}</td>
+                <td>{{ c.totalOrders }}</td>
+                <td class="mono"><b>{{ c.totalSpent | money }}</b></td>
+                <td class="text-secondary">{{ c.lastOrderDate ? (c.lastOrderDate | date:'dd MMM yyyy') : '—' }}</td>
+                <td class="row-actions">
+                  <a class="ib" [routerLink]="['/customers', c.id]"><app-icon name="eye" [size]="16"></app-icon></a>
+                  <button class="ib" (click)="edit(c)"><app-icon name="edit" [size]="16"></app-icon></button>
+                  @if (canManage) { <button class="ib danger" (click)="remove(c)"><app-icon name="trash" [size]="16"></app-icon></button> }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <app-paginator [page]="r.page" [pageSize]="r.pageSize" [totalCount]="r.totalCount" [totalPages]="r.totalPages" [alwaysShow]="true" (pageChange)="goPage($event)"></app-paginator>
+    } @else { <app-empty-state icon="customers" title="No customers yet" message="Add customers or they'll be created automatically at checkout."></app-empty-state> }
+  }
+</div>
+
+@if (modalOpen()) {
+  <div class="modal-overlay" (click)="modalOpen.set(false)">
+    <div class="modal" style="max-width:440px" (click)="$event.stopPropagation()">
+      <div class="modal-head"><h3>{{ editId() ? 'Edit' : 'Add' }} Customer</h3>
+        <button class="close-x" (click)="modalOpen.set(false)"><app-icon name="close"></app-icon></button></div>
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="modal-body">
+          <div class="form-group"><label class="form-label">Name *</label>
+            <input class="form-control" formControlName="name" placeholder="e.g. Rahul Sharma" maxlength="60" [class.invalid]="form.controls.name.touched && form.controls.name.invalid"/>
+            @if (form.controls.name.touched && form.controls.name.invalid) { <div class="field-error">Name is required.</div> }</div>
+          <div class="form-group"><label class="form-label">Mobile Number</label>
+            <input class="form-control" formControlName="mobileNumber" placeholder="10-digit mobile number" inputmode="numeric" maxlength="10" (input)="onMobileInput($event)" [class.invalid]="form.controls.mobileNumber.touched && form.controls.mobileNumber.invalid"/>
+            @if (form.controls.mobileNumber.touched && form.controls.mobileNumber.invalid) { <div class="field-error">Enter a valid 10-digit mobile number.</div> }</div>
+          <div class="form-group"><label class="form-label">Email</label>
+            <input class="form-control" type="email" formControlName="email" placeholder="name@example.com" [class.invalid]="form.controls.email.touched && form.controls.email.invalid"/>
+            @if (form.controls.email.touched && form.controls.email.invalid) { <div class="field-error">Enter a valid email address.</div> }</div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" (click)="modalOpen.set(false)">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="saving()">@if (saving()) { <app-spinner [size]="16"></app-spinner> } @else { Save }</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

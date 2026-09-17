@@ -1,0 +1,138 @@
+<div class="page-head">
+  <div><h1 class="page-title">Printer Settings</h1>
+    <p class="text-secondary">Connect a thermal printer to print bills over USB / COM port</p></div>
+</div>
+
+<!-- connection status -->
+<div class="card card-pad status-card" [class.on]="printer.connected">
+  <div class="st-ic"><app-icon [name]="printer.connected ? 'check' : 'print'" [size]="22"></app-icon></div>
+  <div class="st-body">
+    @if (printer.connected) {
+      <b>Connected — {{ printer.deviceName() }}</b>
+      <span class="text-secondary text-small">
+        @switch (printer.connType()) {
+          @case ('windows') { Prints through the Windows printer driver }
+          @case ('serial') { Prints over the COM port }
+          @case ('network') { Prints over the network }
+          @default { Thermal printer }
+        }
+      </span>
+    } @else {
+      <b>No printer connected</b>
+      <span class="text-secondary text-small">Connect a printer below to print bills directly.</span>
+    }
+  </div>
+  @if (printer.connected) {
+    <button class="btn btn-secondary" (click)="disconnect()">Disconnect</button>
+  }
+</div>
+
+<!-- paper width -->
+<div class="card card-pad paper-card">
+  <div class="pw-text">
+    <b>Paper width</b>
+    <p class="text-secondary text-small">Pick the <b>paper roll</b> you've loaded (not the printer model). Using 58mm paper in an 80mm printer? Choose <b>58 mm</b> — the bill will stay within the paper and won't get cut.</p>
+  </div>
+  <div class="pw-toggle">
+    <button class="pw-opt" [class.active]="printer.paperWidth() === 58" (click)="setPaper(58)">58 mm</button>
+    <button class="pw-opt" [class.active]="printer.paperWidth() === 80" (click)="setPaper(80)">80 mm</button>
+  </div>
+</div>
+
+<!-- connect -->
+<div class="card card-pad opt" [class.reco]="!printer.connected">
+  <div class="opt-ic serial"><app-icon name="print" [size]="22"></app-icon></div>
+  <h3 class="section-title">{{ printer.connected ? 'Printer connection' : 'Connect Thermal Printer' }}</h3>
+
+  @if (!printer.helperRunning) {
+    <div class="warn">
+      <b>Print Helper not running.</b> The New Look Print Helper is a small app that runs on this computer and does the actual printing.
+      Start it, then click Refresh. It listens on <b>localhost:9100</b>.
+    </div>
+    <button class="btn btn-secondary" [disabled]="busy() === 'refresh'" (click)="refreshHelper()">
+      @if (busy() === 'refresh') { <app-spinner [size]="16"></app-spinner> } @else { <app-icon name="reports" [size]="16"></app-icon> Refresh }
+    </button>
+  } @else if (printer.connected && !showConnect()) {
+    <p class="text-secondary text-small helper-ok"><b>Print Helper running ✓</b> — your printer is connected and remembered.</p>
+    <button class="btn btn-secondary" (click)="toggleConnect()"><app-icon name="edit" [size]="16"></app-icon> Change printer</button>
+  } @else {
+    <p class="text-secondary text-small helper-ok">
+      <b>Print Helper running ✓</b> — pick how your printer is connected. It stays connected across refreshes and reconnects on its own.
+    </p>
+
+    <!-- connection type tabs -->
+    <div class="conn-tabs">
+      <button class="ct" [class.active]="tab() === 'windows'" (click)="setTab('windows')">USB / Windows</button>
+      <button class="ct" [class.active]="tab() === 'com'" (click)="setTab('com')">COM port</button>
+      <button class="ct" [class.active]="tab() === 'network'" (click)="setTab('network')">Network</button>
+    </div>
+
+    <!-- USB / Windows -->
+    @if (tab() === 'windows') {
+      <div class="conn-row">
+        <select class="form-control" [ngModel]="selectedPrinter()" (ngModelChange)="selectedPrinter.set($event)">
+          @if (!printers().length) { <option value="">No printers found — install one in Windows</option> }
+          @for (p of printers(); track p) { <option [value]="p">{{ p }}</option> }
+        </select>
+        <button class="btn btn-primary" [disabled]="busy() === 'connect' || !printers().length" (click)="connect()">
+          @if (busy() === 'connect') { <app-spinner [size]="16"></app-spinner> } @else { <app-icon name="print" [size]="16"></app-icon> Connect }
+        </button>
+      </div>
+      <p class="text-secondary text-small hint">Uses the printer's Windows driver. Works only if the driver passes raw ESC/POS. <b>If the bill doesn't print, use the COM port tab instead</b> — most thermal printers print reliably that way.</p>
+    }
+
+    <!-- COM port -->
+    @if (tab() === 'com') {
+      <div class="conn-row">
+        <input class="form-control" list="comPorts" placeholder="COM3" [ngModel]="comPath()" (ngModelChange)="comPath.set($event)"/>
+        <datalist id="comPorts">@for (p of ports(); track p) { <option [value]="p"></option> }</datalist>
+        <input class="form-control baud" type="number" placeholder="9600" [ngModel]="comBaud()" (ngModelChange)="comBaud.set($event)"/>
+        <button class="btn btn-primary" [disabled]="busy() === 'connect'" (click)="connect()">
+          @if (busy() === 'connect') { <app-spinner [size]="16"></app-spinner> } @else { <app-icon name="print" [size]="16"></app-icon> Connect }
+        </button>
+      </div>
+      <p class="text-secondary text-small hint"><b>Most reliable for thermal printers</b> — sends raw ESC/POS straight to the device (no Windows driver). Enter the port (e.g. <b>COM3</b>) and baud rate (usually 9600). USB printers usually get a COM port in Windows too.</p>
+    }
+
+    <!-- Network -->
+    @if (tab() === 'network') {
+      <div class="conn-row">
+        <input class="form-control" placeholder="192.168.1.50" [ngModel]="netHost()" (ngModelChange)="netHost.set($event)"/>
+        <input class="form-control baud" type="number" placeholder="9100" [ngModel]="netPort()" (ngModelChange)="netPort.set($event)"/>
+        <button class="btn btn-primary" [disabled]="busy() === 'connect'" (click)="connect()">
+          @if (busy() === 'connect') { <app-spinner [size]="16"></app-spinner> } @else { <app-icon name="print" [size]="16"></app-icon> Connect }
+        </button>
+      </div>
+      <p class="text-secondary text-small hint">For LAN / Wi-Fi thermal printers. Enter the printer's IP address and port (usually <b>9100</b>).</p>
+    }
+
+    @if (printer.connected) {
+      <button class="btn btn-ghost btn-sm cancel-change" (click)="toggleConnect()">Cancel</button>
+    }
+  }
+</div>
+
+<!-- test -->
+@if (printer.connected) {
+  <div class="card card-pad mt-16 flex items-center justify-between test-row">
+    <div>
+      <b>Test print</b>
+      <p class="text-secondary text-small" style="margin:2px 0 0">Print a small test slip to confirm everything works.</p>
+    </div>
+    <button class="btn btn-secondary" [disabled]="busy() === 'test'" (click)="testPrint()">
+      @if (busy() === 'test') { <app-spinner [size]="16"></app-spinner> } @else { <app-icon name="print" [size]="16"></app-icon> Print Test }
+    </button>
+  </div>
+}
+
+<!-- help -->
+<div class="card card-pad mt-16 help">
+  <h3 class="section-title mb-16">How it works</h3>
+  <ul>
+    <li>Works with <b>58mm / 80mm ESC/POS thermal receipt printers</b> connected as a <b>USB / COM port</b> or on the network.</li>
+    <li>Once connected, the <b>Print</b> button on any bill sends the receipt straight to the printer — no dialog.</li>
+    <li>The printer is remembered — after a page refresh, it reconnects on its own (no port list to pick from again).</li>
+    <li>Printing is handled by the <b>New Look Print Helper</b> app running on this computer (localhost:9100) — keep it running.</li>
+    <li>Printer not in the USB list? Set it up once in Windows: <b>Devices and Printers → right-click the printer → Ports</b>.</li>
+  </ul>
+</div>

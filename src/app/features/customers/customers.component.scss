@@ -1,0 +1,10 @@
+/* fill the whole content area: search + paginator fixed, only the rows scroll */
+/* bound to the viewport (below the sticky header, minus .content padding) so the
+   rows scroll inside and the paginator pins to the bottom — no page overflow */
+:host { display: flex; flex-direction: column; height: calc(100vh - var(--header-h, 68px) - 48px); min-height: 0; }
+:host > .page-head { flex: none; }
+:host > .card { flex: 1 1 auto; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+:host > .card > .filters { flex: none; }
+:host > .card > app-paginator { flex: none; }
+:host > .card > .table-wrap { flex: 1 1 auto; overflow-y: auto; min-height: 0; max-height: none; }
+:host > .card > .table-wrap table.data thead th { position: sticky; top: 0; z-index: 2; background: var(--card); }

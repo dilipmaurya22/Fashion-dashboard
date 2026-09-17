@@ -1,0 +1,75 @@
+<div class="modal-overlay" (click)="closed.emit()">
+  <div class="modal detail-modal" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <h3>Product Details</h3>
+      <button class="close-x" (click)="closed.emit()"><app-icon name="close"></app-icon></button>
+    </div>
+
+    <div class="modal-body">
+      <!-- hero -->
+      <div class="fd-hero">
+        <div class="fd-img">
+          @if (showImage) { <img [src]="fashion.imageUrl" [alt]="fashion.name" (error)="imgError = true"/> }
+          @else { <span class="fd-emoji">{{ fashionEmoji() }}</span> }
+        </div>
+        <h2 class="fd-name">{{ fashion.name }}</h2>
+        <div class="fd-tags">
+          <span class="badge badge-neutral">{{ fashion.categoryName }}</span>
+          <span class="badge" [class.badge-success]="fashion.isAvailable" [class.badge-danger]="!fashion.isAvailable">
+            {{ fashion.isAvailable ? 'Available' : 'Unavailable' }}</span>
+        </div>
+        <div class="fd-price">{{ fashion.sellingPrice | money }}</div>
+      </div>
+
+      @if (fashion.description) { <p class="fd-desc">{{ fashion.description }}</p> }
+
+      <!-- quick facts -->
+      <div class="fd-facts">
+        <div class="fact"><span class="lbl">SKU / Code</span><b>{{ fashion.sku }}</b></div>
+        <div class="fact"><span class="lbl">Category</span><b>{{ fashion.categoryName }}</b></div>
+        @if (fashion.subCategoryName) { <div class="fact"><span class="lbl">Sub-category</span><b>{{ fashion.subCategoryName }}</b></div> }
+        @if (fashion.brandName) { <div class="fact"><span class="lbl">Brand</span><b>{{ fashion.brandName }}</b></div> }
+        @if (fashion.hsnCode) { <div class="fact"><span class="lbl">HSN Code</span><b>{{ fashion.hsnCode }}</b></div> }
+        <div class="fact"><span class="lbl">Tax</span><b>{{ fashion.taxPercent }}%</b></div>
+        <div class="fact"><span class="lbl">Min Stock</span><b>{{ fashion.minStock }}</b></div>
+        <div class="fact"><span class="lbl">Status</span><b>{{ fashion.isAvailable ? 'Available' : 'Unavailable' }}</b></div>
+      </div>
+
+      <!-- pricing & profit -->
+      <h4 class="fd-sec">Pricing & Profit</h4>
+      <div class="fd-cost">
+        @if (fashion.mrp && fashion.mrp > 0) { <div class="cr"><span>MRP</span><span>{{ fashion.mrp | money }}</span></div> }
+        <div class="cr"><span>Selling Price</span><b>{{ fashion.sellingPrice | money }}</b></div>
+        <div class="cr"><span>Purchase Price</span><span>{{ fashion.costPrice | money }}</span></div>
+        @if (fashion.mrp && fashion.mrp > fashion.sellingPrice) {
+          <div class="cr"><span>Customer Discount (MRP − Selling)</span><span>{{ (fashion.mrp - fashion.sellingPrice) | money }}</span></div>
+        }
+        <div class="cr total profit"><span>Gross Profit (Selling − Purchase)</span><b>{{ fashion.grossProfit | money }}</b></div>
+        <div class="cr"><span>Profit Margin</span>
+          <span class="badge" [class.badge-success]="fashion.profitMargin >= 40" [class.badge-warning]="fashion.profitMargin < 40">{{ fashion.profitMargin }}%</span></div>
+      </div>
+
+      <!-- variants -->
+      @if (fashion.variants.length) {
+        <h4 class="fd-sec">Variants / Sizes</h4>
+        <div class="fd-variants">
+          @for (v of fashion.variants; track v.id) {
+            <div class="fv">
+              <span class="fv-name">{{ v.name }}</span>
+              <span class="fv-price">
+                @if (v.mrp && v.mrp > v.price) { <s class="fv-mrp">{{ v.mrp | money }}</s> }
+                <b>{{ v.price | money }}</b>
+                <span class="fv-stock">Stock: {{ v.stock ?? 0 }}</span>
+              </span>
+            </div>
+          }
+        </div>
+      }
+
+    </div>
+
+    <div class="modal-foot">
+      <button type="button" class="btn btn-primary" (click)="closed.emit()">Close</button>
+    </div>
+  </div>
+</div>

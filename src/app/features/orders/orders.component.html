@@ -1,0 +1,86 @@
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Billing</h1>
+    <p class="text-secondary">Track and manage all customer billing</p>
+  </div>
+  <a class="btn btn-primary" routerLink="/pos"><app-icon name="plus" [size]="18"></app-icon> New Billing</a>
+</div>
+
+<div class="card">
+  <div class="filters">
+    <div class="search-box">
+      <app-icon name="search" [size]="18"></app-icon>
+      <input type="text" placeholder="Search billing # or customer…" (input)="onSearch($any($event.target).value)" />
+    </div>
+    <select class="form-control filt" [ngModel]="status()" (ngModelChange)="status.set($event); changeFilter()">
+      <option value="">All Status</option>
+      @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
+    </select>
+    <select class="form-control filt" [ngModel]="orderType()" (ngModelChange)="orderType.set($event); changeFilter()">
+      <option value="">All Types</option>
+      @for (t of types; track t) { <option [value]="t">{{ t }}</option> }
+    </select>
+    <select class="form-control filt" [ngModel]="paymentMethod()" (ngModelChange)="paymentMethod.set($event); changeFilter()">
+      <option value="">All Payments</option>
+      @for (m of methods; track m) { <option [value]="m">{{ m }}</option> }
+    </select>
+    <button class="btn btn-ghost btn-sm" (click)="clearFilters()">Clear</button>
+  </div>
+
+  @if (loading()) {
+    <app-loading></app-loading>
+  } @if (result(); as r) {
+    @if (r.items.length) {
+      <div class="table-wrap">
+        <table class="data">
+          <thead>
+            <tr><th>Billing</th><th>Date / Time</th><th>Customer</th><th>Items</th><th>Total</th>
+              <th>Payment</th><th>Type</th><th>Status</th><th></th></tr>
+          </thead>
+          <tbody>
+            @for (o of r.items; track o.id) {
+              <tr>
+                <td><a class="onum" [routerLink]="['/orders', o.id]">{{ o.orderNumber }}</a></td>
+                <td class="text-secondary">{{ o.orderDate | date:'dd MMM, h:mm a' }}</td>
+                <td>{{ o.customerName || 'Walk-in' }}</td>
+                <td>{{ o.itemCount }}</td>
+                <td class="mono"><b>{{ o.grandTotal | money }}</b></td>
+                <td>{{ o.paymentMethod || '—' }}</td>
+                <td><span class="badge badge-neutral">{{ o.orderType }}</span></td>
+                <td><app-order-status [status]="o.status"></app-order-status></td>
+                <td class="row-actions">
+                  @if (actionsFor(o.status).length) {
+                    <button class="ib update" title="Update status" [disabled]="busyId() === o.id" (click)="openMenu(o, $event)">
+                      @if (busyId() === o.id) { <app-spinner [size]="14"></app-spinner> }
+                      @else { <app-icon name="adjust" [size]="15"></app-icon> }
+                    </button>
+                  }
+                  <a class="ib" [routerLink]="['/orders', o.id]" title="View"><app-icon name="eye" [size]="16"></app-icon></a>
+                  <button class="ib" title="Receipt" (click)="receiptId.set(o.id)"><app-icon name="print" [size]="16"></app-icon></button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <app-paginator [page]="r.page" [pageSize]="r.pageSize" [totalCount]="r.totalCount"
+        [totalPages]="r.totalPages" (pageChange)="goPage($event)"></app-paginator>
+    } @else {
+      <app-empty-state icon="orders" title="No billing found" message="Try adjusting your filters."></app-empty-state>
+    }
+  }
+</div>
+
+@if (menuFor() !== null && activeOrder(); as o) {
+  <div class="menu-backdrop" (click)="closeMenu()"></div>
+  <div class="menu-pop" [style.top.px]="menuPos()?.top" [style.left.px]="menuPos()?.left">
+    <div class="mp-title">Update status — {{ o.orderNumber }}</div>
+    @for (a of actionsFor(o.status); track a.status) {
+      <button class="mi {{ a.kind }}" (click)="changeStatus(o, a.status)">{{ a.label }}</button>
+    }
+  </div>
+}
+
+@if (receiptId(); as id) {
+  <app-receipt-dialog [orderId]="id" (closed)="receiptId.set(null)"></app-receipt-dialog>
+}

@@ -1,0 +1,38 @@
+<div class="page-head"><div><h1 class="page-title">Inventory Transactions</h1>
+  <p class="text-secondary">Every stock movement — purchases, sales, adjustments</p></div></div>
+
+<div class="card">
+  <div class="filters">
+    <div class="spacer"></div>
+    <select class="form-control filt" [ngModel]="type()" (ngModelChange)="type.set($event); changeFilter()">
+      <option value="">All Types</option>
+      @for (t of types; track t) { <option [value]="t">{{ t }}</option> }
+    </select>
+  </div>
+
+  @if (loading()) { <app-loading></app-loading> }
+  @if (result(); as r) {
+    @if (r.items.length) {
+      <div class="table-wrap">
+        <table class="data">
+          <thead><tr><th>Date</th><th>Product</th><th>Type</th><th>Qty</th><th>Previous</th><th>New</th><th>Reference</th><th>User</th></tr></thead>
+          <tbody>
+            @for (t of r.items; track t.id) {
+              <tr>
+                <td class="text-secondary">{{ t.date | date:'dd MMM, h:mm a' }}</td>
+                <td><b>{{ t.ingredientName }}</b></td>
+                <td><span class="badge {{ badgeClass(t.type) }}">{{ t.type }}</span></td>
+                <td class="mono" [class.neg]="t.quantity < 0" [class.pos]="t.quantity > 0"><b>{{ t.quantity > 0 ? '+' : '' }}{{ t.quantity }} {{ t.unit }}</b></td>
+                <td class="mono text-secondary">{{ t.previousStock }}</td>
+                <td class="mono">{{ t.newStock }}</td>
+                <td>{{ t.reference || '—' }}</td>
+                <td class="text-secondary">{{ t.user || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <app-paginator [page]="r.page" [pageSize]="r.pageSize" [totalCount]="r.totalCount" [totalPages]="r.totalPages" (pageChange)="goPage($event)"></app-paginator>
+    } @else { <app-empty-state icon="adjust" title="No transactions yet" message="Stock movements will appear here."></app-empty-state> }
+  }
+</div>

@@ -1,0 +1,25 @@
+<div class="page-head"><div><h1 class="page-title">Inventory Report</h1>
+  <p class="text-secondary">Stock value, consumption and wastage</p></div></div>
+
+@if (loading()) { <app-loading></app-loading> }
+@if (data(); as d) {
+  <div class="rkpis">
+    <div class="card card-pad rkpi"><span class="lbl">Total Inventory Value</span><b>{{ d.totalInventoryValue | money }}</b></div>
+    <div class="card card-pad rkpi"><span class="lbl">Low Stock</span><b class="warn">{{ d.lowStockCount }}</b></div>
+    <div class="card card-pad rkpi"><span class="lbl">Out of Stock</span><b class="danger">{{ d.outOfStockCount }}</b></div>
+    <div class="card card-pad rkpi"><span class="lbl">Wastage Value</span><b>{{ d.totalWastageValue | money }}</b></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card card-pad">
+      <h3 class="section-title mb-16">Most Sold Products</h3>
+      @if (topUsed().length) { <app-bar-chart [data]="topUsed()"></app-bar-chart> }
+      @else { <app-empty-state icon="inventory" title="No consumption yet" message="Complete some orders to see usage."></app-empty-state> }
+    </div>
+    <div class="card card-pad">
+      <h3 class="section-title mb-16">Purchases</h3>
+      <div class="rkpi"><span class="lbl">Total Stock Purchases</span><b>{{ d.totalPurchaseValue | money }}</b></div>
+      <p class="text-secondary text-small mt-16">Total value of ingredient stock brought in via Stock In and opening balances.</p>
+    </div>
+  </div>
+}

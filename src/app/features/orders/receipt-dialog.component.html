@@ -1,0 +1,73 @@
+<div class="overlay" (click)="close()">
+  <div class="dialog" (click)="$event.stopPropagation()">
+    <div class="dialog-head no-print">
+      <h3>Receipt</h3>
+      <button class="close" (click)="close()"><app-icon name="close"></app-icon></button>
+    </div>
+
+    @if (receipt(); as r) {
+      <div class="receipt" id="print-area">
+        <div class="r-center r-biz">{{ r.businessName }}</div>
+        @if (r.address) { <div class="r-center r-small">{{ r.address }}</div> }
+        @if (r.mobileNumber) { <div class="r-center r-small">Ph: {{ r.mobileNumber }}</div> }
+        @if (r.gstNumber) { <div class="r-center r-small">GST: {{ r.gstNumber }}</div> }
+        <div class="dash"></div>
+
+        <div class="r-row"><span>Billing #{{ r.orderNumber }}</span><span>{{ r.orderType }}</span></div>
+        <div class="r-row r-small"><span>{{ r.orderDate | date:'dd MMM yyyy, h:mm a' }}</span>@if (r.tableNumber) { <span>Table {{ r.tableNumber }}</span> }</div>
+        @if (r.customerName) { <div class="r-row r-small"><span>Customer: {{ r.customerName }}</span></div> }
+        <div class="dash"></div>
+
+        @for (i of r.items; track i.id) {
+          <div class="r-item">
+            <div class="r-row"><span class="r-iname">{{ i.fashionName }}{{ i.variantName ? ' (' + i.variantName + ')' : '' }}</span><span>{{ r.currencySymbol }}{{ i.lineTotal.toFixed(2) }}</span></div>
+            <div class="r-row r-small">
+              <span>{{ i.quantity }} x {{ r.currencySymbol }}{{ i.unitPrice.toFixed(2) }}</span>
+              @if (i.mrp && i.mrp > i.unitPrice) {
+                <span>MRP <s>{{ r.currencySymbol }}{{ i.mrp.toFixed(2) }}</s> · Save {{ r.currencySymbol }}{{ ((i.mrp - i.unitPrice) * i.quantity).toFixed(2) }}</span>
+              }
+            </div>
+          </div>
+        }
+        <div class="dash"></div>
+
+        @if (r.mrpTotal && r.mrpTotal > r.subtotal) { <div class="r-row"><span>MRP Total</span><span>{{ r.currencySymbol }}{{ r.mrpTotal.toFixed(2) }}</span></div> }
+        @if (r.productDiscount && r.productDiscount > 0) { <div class="r-row"><span>Product Discount</span><span>- {{ r.currencySymbol }}{{ r.productDiscount.toFixed(2) }}</span></div> }
+        <div class="r-row"><span>Subtotal</span><span>{{ r.currencySymbol }}{{ r.subtotal.toFixed(2) }}</span></div>
+        @if (r.discountAmount > 0) { <div class="r-row"><span>Extra Discount</span><span>- {{ r.currencySymbol }}{{ r.discountAmount.toFixed(2) }}</span></div> }
+        @if (r.taxAmount > 0) { <div class="r-row"><span>Tax</span><span>{{ r.currencySymbol }}{{ r.taxAmount.toFixed(2) }}</span></div> }
+        <div class="r-row r-total"><span>TOTAL</span><span>{{ r.currencySymbol }}{{ r.grandTotal.toFixed(2) }}</span></div>
+        <div class="dash"></div>
+
+        <div class="r-row r-small"><span>Payment: {{ r.paymentMethod }}</span></div>
+        <div class="r-center r-footer">{{ r.footer }}</div>
+      </div>
+
+      <div class="printer-bar no-print">
+        @if (printer.connected) {
+          <span class="pr-status ok"><app-icon name="check" [size]="14"></app-icon> Printer: {{ printer.deviceName() }}</span>
+        } @else {
+          <div class="pr-connect">
+            <span class="pr-status"><app-icon name="print" [size]="14"></app-icon> No printer connected — connect one to print bills:</span>
+            <div class="pr-btns">
+              <button class="btn btn-secondary btn-sm" [disabled]="connecting() === 'connect'" (click)="connect()">
+                @if (connecting() === 'connect') { <app-spinner [size]="14"></app-spinner> } @else { <app-icon name="print" [size]="14"></app-icon> Connect Printer }
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="actions no-print">
+        @if (printer.connected) {
+          <button class="btn btn-primary" (click)="print()" [disabled]="printing()">
+            @if (printing()) { <app-spinner [size]="16"></app-spinner> } @else { <app-icon name="print" [size]="16"></app-icon> Print Bill }
+          </button>
+        }
+        <button class="btn btn-ghost" (click)="close()">Close</button>
+      </div>
+    } @else {
+      <div class="loading-r"><app-spinner></app-spinner></div>
+    }
+  </div>
+</div>

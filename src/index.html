@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>New Look Fashion</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#F97316">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z'/%3E%3C/svg%3E">
+  <style>
+    /* Boot splash — shows before Angular hydrates, replaced on bootstrap */
+    #fc-boot {
+      position: fixed; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 20px; background: #F8FAFC;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      animation: fcBootIn .2s ease-out both;
+    }
+    #fc-boot .stage { position: relative; width: 120px; height: 120px; }
+    #fc-boot .ring { position: absolute; inset: 0; width: 100%; height: 100%;
+      transform-origin: 50% 50%; animation: fcBootSpin 1.2s linear infinite; }
+    #fc-boot .box { position: absolute; inset: 0; margin: auto; width: 60px; height: 60px; border-radius: 50%;
+      background: #fff; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 18px rgba(249,115,22,.18), 0 1px 3px rgba(17,24,39,.08);
+      animation: fcBootPulse 1.5s ease-in-out .3s infinite; }
+    #fc-boot .t1 { font-size: 14px; font-weight: 500; color: #6B7280; }
+    #fc-boot .t2 { font-size: 12px; color: #9CA3AF; margin-top: 4px; }
+    @keyframes fcBootSpin { to { transform: rotate(360deg); } }
+    @keyframes fcBootPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+    @keyframes fcBootIn { from { opacity: 0; } to { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { #fc-boot .ring { animation-duration: 2.4s; } #fc-boot .box { animation: none; } }
+  </style>
+</head>
+<body>
+  <app-root>
+    <!-- Boot splash: visible until the Angular app renders -->
+    <div id="fc-boot" role="status" aria-live="polite" aria-label="Loading FashionCart application">
+      <div class="stage">
+        <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+          <defs>
+            <linearGradient id="fcBootGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#F97316"/>
+              <stop offset="100%" stop-color="#EA580C"/>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(249,115,22,.14)" stroke-width="6"/>
+          <circle cx="50" cy="50" r="42" fill="none" stroke="url(#fcBootGrad)" stroke-width="6"
+                  stroke-linecap="round" stroke-dasharray="150 264"/>
+        </svg>
+        <div class="box">
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none"
+               stroke="#F97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/>
+            <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>
+          </svg>
+        </div>
+      </div>
+      <div style="text-align:center">
+        <div class="t1">Loading FashionCart...</div>
+        <div class="t2">Please wait...</div>
+      </div>
+    </div>
+  </app-root>
+</body>
+</html>

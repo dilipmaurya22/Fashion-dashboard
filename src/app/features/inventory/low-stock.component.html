@@ -1,0 +1,29 @@
+<div class="page-head"><div><h1 class="page-title">Low Stock Alerts</h1>
+  <p class="text-secondary">Products at or below their minimum level</p></div>
+  <a class="btn btn-primary" routerLink="/inventory/stock-in"><app-icon name="stockin" [size]="18"></app-icon> Restock</a></div>
+
+@if (loading()) { <app-loading></app-loading> }
+@else if (items().length) {
+  <div class="card">
+    <div class="table-wrap">
+      <table class="data">
+        <thead style="height: 55px;"><tr><th>Product</th><th>Current</th><th>Minimum</th><th>Shortfall</th><th>Value</th><th>Status</th></tr></thead>
+        <tbody>
+          @for (i of paged(); track i.id) {
+            <tr>
+              <td><b>{{ i.name }} • </b> <span class="text-secondary text-small">{{ i.sku }}</span></td>
+              <td class="mono"><b>{{ i.currentStock }}</b> {{ i.unit }}</td>
+              <td class="mono text-secondary">{{ i.minimumStock }} {{ i.unit }}</td>
+              <td class="mono neg"><b>{{ (i.minimumStock - i.currentStock) > 0 ? (i.minimumStock - i.currentStock) : 0 }} {{ i.unit }}</b></td>
+              <td class="mono">{{ i.stockValue | money }}</td>
+              <td><app-stock-status [status]="i.status"></app-stock-status></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-paginator [page]="page()" [pageSize]="pageSize" [totalCount]="items().length" [totalPages]="totalPages()" [alwaysShow]="true" (pageChange)="goPage($event)"></app-paginator>
+  </div>
+} @else {
+  <div class="card"><app-empty-state icon="check" title="All good!" message="No products are low on stock right now."></app-empty-state></div>
+}

@@ -1,0 +1,106 @@
+@if (loading()) {
+  <app-loading></app-loading>
+} @else if (data()) {
+  <div class="dash-head">
+    <div>
+      <h1 class="page-title">{{ greeting() }}</h1>
+      <p class="text-secondary">{{ now | date:'EEEE, dd MMMM yyyy' }}</p>
+    </div>
+    <a class="btn btn-primary new-order-btn" routerLink="/pos"><app-icon name="plus" [size]="18"></app-icon> New Billing</a>
+  </div>
+
+  <!-- top region: KPI cards -->
+  <div class="top-region">
+    <div class="kpi-grid">
+      @for (c of cards(); track c.key) {
+        <div class="card kpi">
+          <div class="kpi-row">
+            <span class="kpi-label">{{ c.label }}</span>
+            <span class="kpi-ic"><app-icon [name]="c.icon" [size]="16"></app-icon></span>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value"><span [appCountUp]="c.raw" [cuMoney]="c.money" [cuDecimals]="0"></span></div>
+            <div class="kpi-spark"><app-sparkline [data]="c.spark" [color]="c.color"></app-sparkline></div>
+          </div>
+          <div class="kpi-foot">
+            <span class="delta" [class.up]="c.change >= 0" [class.down]="c.change < 0">
+              {{ c.change >= 0 ? '+' : '' }}{{ c.change }}%
+            </span>
+            <span class="text-secondary">vs last month</span>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- middle region: Billing Rate  +  Visitors Age -->
+  <div class="mid-region">
+    <div class="card card-pad order-rate">
+      <div class="or-head">
+        <div>
+          <h3 class="section-title">Billing Rate</h3>
+          <p class="text-secondary text-small">Billing activity this year</p>
+        </div>
+        <div class="seg">
+          @for (m of ['weekly','monthly','yearly']; track m) {
+            <button [class.active]="orderRateMode() === m" (click)="orderRateMode.set($any(m))">{{ m | titlecase }}</button>
+          }
+        </div>
+      </div>
+      <app-column-chart [data]="orderRate()" prefix="₹"></app-column-chart>
+    </div>
+
+    <div class="card card-pad visitors">
+      <div class="or-head"><h3 class="section-title">Payment Mix</h3><span class="text-secondary text-small">Last 30 days</span></div>
+      @if (paymentSegments().length) {
+        <div class="pm-body">
+          <app-gauge-chart [data]="paymentSegments()" totalLabel="100%"></app-gauge-chart>
+          <div class="pm-legend">
+            @for (s of paymentSegments(); track s.label) {
+              <div class="pl">
+                <span class="pl-dot" [style.background]="s.color"></span>
+                <div class="pl-txt">
+                  <span class="pl-name">{{ s.label }}</span>
+                  <span class="pl-val">{{ s.hint }} <span class="pl-pct">({{ s.value }}%)</span></span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        <app-empty-state icon="payment" title="No payments yet" message="Payment split will appear here as orders come in."></app-empty-state>
+      }
+    </div>
+  </div>
+
+  <!-- recent orders -->
+  <div class="card recent-card">
+    <div class="rc-head">
+      <h3 class="section-title">Recent Billing</h3>
+      <div class="rc-search">
+        <app-icon name="search" [size]="16"></app-icon>
+        <input placeholder="Search customer…" [ngModel]="recentSearch()" (ngModelChange)="recentSearch.set($event)" />
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Code</th><th>Customer</th><th>Items</th><th>Price</th><th>Payment</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>
+          @for (o of recentOrders(); track o.id) {
+            <tr>
+              <td><a class="onum" [routerLink]="['/orders', o.id]">{{ o.orderNumber }}</a></td>
+              <td>{{ o.customerName || 'Walk-in' }}</td>
+              <td>{{ o.itemCount }}</td>
+              <td class="mono"><b>{{ o.grandTotal | money }}</b></td>
+              <td>{{ o.paymentMethod || '—' }}</td>
+              <td><app-order-status [status]="o.status"></app-order-status></td>
+              <td class="text-secondary">{{ o.orderDate | date:'dd MMM yyyy' }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" style="text-align:center;padding:32px" class="text-secondary">No billing found.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

@@ -1,0 +1,177 @@
+<div class="modal-overlay" (click)="cancelled.emit()">
+  <div class="modal wide" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <h3>{{ viewMode ? 'Product Details' : (fashionId ? 'Edit Product' : 'Add Product') }}</h3>
+      <button class="close-x" (click)="cancelled.emit()"><app-icon name="close"></app-icon></button>
+    </div>
+
+    @if (loading()) {
+      <div class="modal-body"><div class="flex" style="justify-content:center;padding:32px"><app-spinner></app-spinner></div></div>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Product Name *</label>
+              <input class="form-control" formControlName="name" placeholder="e.g. Slim Fit Denim Jeans" [class.invalid]="form.controls.name.touched && form.controls.name.invalid"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">SKU / Code *</label>
+              <input class="form-control" formControlName="sku" placeholder="e.g. NLF-JEANS-01" [class.invalid]="form.controls.sku.touched && form.controls.sku.invalid"/>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Category *</label>
+              <select class="form-control" formControlName="categoryId" (change)="onCategoryChange()" [class.invalid]="form.controls.categoryId.touched && form.controls.categoryId.invalid">
+                <option [ngValue]="null" disabled>Select category</option>
+                @for (c of categories(); track c.id) { <option [ngValue]="c.id">{{ c.name }}</option> }
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Subcategory *</label>
+              <select class="form-control" formControlName="subCategoryId" [class.invalid]="form.controls.subCategoryId.touched && form.controls.subCategoryId.invalid">
+                <option [ngValue]="null" disabled>{{ !form.controls.categoryId.value ? 'Select category first' : (loadingSubs() ? 'Loading…' : (subCategories().length ? 'Select subcategory' : 'No subcategories — add one first')) }}</option>
+                @for (s of subCategories(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
+              </select>
+            </div>
+          </div>
+
+          <div class="">
+            <div class="form-group">
+              <label class="form-label">Product Image</label>
+              @if (form.controls.imageUrl.value) {
+                <div class="img-preview">
+                  <img [src]="form.controls.imageUrl.value" alt="preview"/>
+                  @if (!viewMode) {
+                    <button type="button" class="img-remove" (click)="clearImage()" title="Remove"><app-icon name="close" [size]="14"></app-icon></button>
+                  }
+                </div>
+              } @else if (!viewMode) {
+                <label class="img-drop">
+                  <app-icon name="image" [size]="22"></app-icon>
+                  <span>Upload image</span>
+                  <input type="file" accept="image/*" (change)="onFile($event)" hidden/>
+                </label>
+              } @else {
+                <div class="img-drop" style="cursor:default"><app-icon name="image" [size]="22"></app-icon><span>No image</span></div>
+              }
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Brand Name</label>
+              <input class="form-control" formControlName="brandName" placeholder="e.g. New Look" maxlength="100"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">HSN Code</label>
+              <input class="form-control" formControlName="hsnCode" placeholder="e.g. 6109" maxlength="20"/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" rows="2" formControlName="description" placeholder="Short product description (optional)"></textarea>
+          </div>
+
+          <div class="grid-3">
+            <div class="form-group">
+              <label class="form-label">MRP</label>
+              <input class="form-control" type="number" step="0.01" formControlName="mrp" placeholder="0"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Purchase Price</label>
+              <input class="form-control" type="number" step="0.01" formControlName="costPrice" placeholder="0"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Selling Price *</label>
+              <input class="form-control" type="number" step="0.01" formControlName="sellingPrice" placeholder="0" [class.invalid]="(form.controls.sellingPrice.touched && form.controls.sellingPrice.invalid) || form.errors?.['sellingOverMrp']"/>
+            </div>
+          </div>
+          @if (variants.controls.length) {
+            <p class="base-hint">Base prices — new variants copy these; edit each variant below to set its own MRP / Purchase / Selling.</p>
+          }
+          @if (form.errors?.['sellingOverMrp'] || form.errors?.['costOverMrp']) {
+            <p class="field-error">
+              @if (form.errors?.['sellingOverMrp']) { Selling price cannot be more than MRP. }
+              @if (form.errors?.['costOverMrp']) { Purchase price cannot be more than MRP. }
+            </p>
+          }
+
+          <div class="grid-3">
+            <div class="form-group">
+              <label class="form-label">Tax</label>
+              <select class="form-control" formControlName="taxPercent">
+                @for (r of taxRates; track r) { <option [ngValue]="r">{{ r }}% GST</option> }
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Stock {{ isEdit ? '(add via Stock In)' : (variants.controls.length ? '(per variant below)' : '') }}</label>
+              <input class="form-control" type="number" step="1" formControlName="stock" placeholder="0"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Min Stock</label>
+              <input class="form-control" type="number" step="1" formControlName="minStock" placeholder="0"/>
+            </div>
+          </div>
+
+          <div class="toggles">
+            <label class="tg"><input type="checkbox" formControlName="isVeg"/> Featured product</label>
+            <label class="tg"><input type="checkbox" formControlName="isAvailable"/> Available</label>
+          </div>
+
+
+          <!-- variants -->
+          <div class="recipe-head">
+            <h4>Variants / Sizes <span class="text-secondary text-small" style="font-weight:400"></span></h4>
+            @if (!viewMode) {
+              <button type="button" class="btn btn-secondary btn-sm" (click)="addVariantRow()"><app-icon name="plus" [size]="14"></app-icon> Add</button>
+            }
+          </div>
+          <div formArrayName="variants" class="variant-rows">
+            @if (variants.controls.length) {
+              <div class="variant-row vhead">
+                <span>Color</span><span>Size</span><span>MRP ₹</span><span>Purchase ₹</span><span>Selling ₹</span><span>Stock</span><span></span>
+              </div>
+            }
+            @for (row of variants.controls; track row) {
+              <div class="variant-row" [formGroupName]="$index">
+                <input class="form-control" formControlName="color" placeholder="e.g. Black"/>
+                <input class="form-control" formControlName="size" placeholder="e.g. M"/>
+                <input class="form-control vprice" type="number" step="0.01" formControlName="mrp" placeholder="0"/>
+                <input class="form-control vprice" type="number" step="0.01" formControlName="purchase" placeholder="0" [class.invalid]="row.errors?.['purchaseOverMrp']" title="Purchase price cannot be more than MRP"/>
+                <input class="form-control vprice" type="number" step="0.01" formControlName="price" placeholder="0" [class.invalid]="row.errors?.['sellingOverMrp']" title="Selling price cannot be more than MRP"/>
+                <input class="form-control vprice" type="number" step="1" formControlName="stock" placeholder="0"/>
+                @if (!viewMode) {
+                  <button type="button" class="ib danger" (click)="removeVariantRow($index)"><app-icon name="trash" [size]="15"></app-icon></button>
+                }
+              </div>
+            } @empty {
+              <p class="text-secondary text-small">No variants. If added, customers pick a color/size in POS and the price follows the chosen variant.</p>
+            }
+          </div>
+
+          <!-- profit preview -->
+          <div class="profit">
+            <div><span class="text-secondary text-small">Total Cost</span><b>₹{{ totalCost().toFixed(2) }}</b></div>
+            <div><span class="text-secondary text-small">Profit Margin</span>
+              <b [class.pos]="margin() >= 0" [class.neg]="margin() < 0">{{ margin() }}%</b></div>
+          </div>
+        </div>
+
+        <div class="modal-foot">
+          @if (viewMode) {
+            <button type="button" class="btn btn-primary" (click)="cancelled.emit()">Close</button>
+          } @else {
+            <button type="button" class="btn btn-ghost" (click)="cancelled.emit()">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving()">
+              @if (saving()) { <app-spinner [size]="16"></app-spinner> } @else { Save Product }
+            </button>
+          }
+        </div>
+      </form>
+    }
+  </div>
+</div>

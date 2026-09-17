@@ -1,0 +1,19 @@
+.range-tabs { display: flex; gap: 6px; }
+.range-tabs button { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card);
+  color: var(--text-secondary); font-weight: 600; font-size: 13px; }
+.range-tabs button.active { background: var(--charcoal); color: #fff; border-color: var(--charcoal); }
+
+.rkpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+.rkpi { display: flex; flex-direction: column; gap: 6px; }
+.rkpi .lbl { font-size: 13px; color: var(--text-secondary); }
+.rkpi b { font-size: 26px; font-weight: 700; }
+
+.pay-list { display: flex; flex-direction: column; gap: 4px; }
+.pay-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.pay-row:last-child { border-bottom: none; }
+
+@media (max-width: 1024px) { .rkpis { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .rkpis { grid-template-columns: 1fr; } }
+
+.rkpi b.warn { color: var(--warning); }
+.rkpi b.danger { color: var(--danger); }

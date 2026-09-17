@@ -1,0 +1,55 @@
+<div class="login-page">
+  <!-- LEFT: branded visual -->
+  <div class="login-visual" [class.has-image]="chefOk()">
+    @if (chefOk()) {
+      <img class="lv-chef" src="/New-look2.png" alt="New Look Fashion" (error)="chefOk.set(false)" />
+    } @else {
+      
+    }
+  </div>
+
+  <!-- RIGHT: form -->
+  <div class="login-form-wrap">
+    <div class="login-form">
+      <div class="brand-badge">
+        <!-- <span class="logo"><app-icon name="fashion" [size]="24"></app-icon>
+        </span> -->
+        
+    </div>
+
+      <h1>Login</h1>
+      <p class="sub">Welcome back! Please sign in to continue.</p>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        @if (error()) { <div class="alert">{{ error() }}</div> }
+
+        <div class="field">
+          <label><span class="req">*</span> Email or Username</label>
+          <input class="inp" formControlName="usernameOrEmail" autocomplete="username" placeholder="Enter your email or username"
+            [class.invalid]="form.controls.usernameOrEmail.touched && form.controls.usernameOrEmail.invalid" />
+        </div>
+
+        <div class="field">
+          <label><span class="req">*</span> Password</label>
+          <div class="pw">
+            <input class="inp" [type]="showPassword() ? 'text' : 'password'" formControlName="password" autocomplete="current-password" placeholder="Enter your password"
+              [class.invalid]="form.controls.password.touched && form.controls.password.invalid" />
+            <button type="button" class="eye" (click)="showPassword.set(!showPassword())" [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'">
+              <app-icon [name]="showPassword() ? 'eye' : 'eye'" [size]="18"></app-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="row-right">
+          <a class="link" (click)="forgot()">Forget Password?</a>
+        </div>
+
+        <button class="login-btn" type="submit" [disabled]="loading()">
+          @if (loading()) { <app-spinner [size]="18"></app-spinner> } @else { Log in }
+        </button>
+
+        <p class="signup">Create account? <a class="link strong" (click)="signup()">Sign up</a></p>
+      </form>
+    </div>
+  </div>
+</div>
